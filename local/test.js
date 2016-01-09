@@ -7,7 +7,7 @@ var Hasher = require('./audioHasher');
 var time = require('./audioChrono');
 var glob = require('glob');
 var context = new AudioContext();
-var downsample = require('./audioDownSampler');
+var downsample = require('./audio-downsampler');
 
 function testme(path, cb) {
   fs.readFile('./audio_files/440hz.mp3', function(err, data) {

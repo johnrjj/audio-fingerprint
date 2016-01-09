@@ -1,7 +1,7 @@
 'use strict';
 var _ = require('lodash');
-var windowFilter = require('./audioWindow');
-var decimator = require('./audioDecimator');
+var windowFilter = require('./audio-window-filter');
+var decimator = require('./audio-decimator');
 var dsp = require('./dsp');
 
 module.exports = function(signal, origFrequency, targetFrequency) {
