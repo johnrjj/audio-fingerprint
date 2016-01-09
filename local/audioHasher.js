@@ -47,7 +47,8 @@ function groupDataChunkToBins(freqMagnitudeArray, binRanges) {
 function computeBestFitForEachBin(groupedBins) {
   let bestFitPerBin = _.map(groupedBins, function(binCollection) {
     return _.max(binCollection, function(freqMagPair) {
-      return freqMagPair.magnitude;
+      // if(freqMagPair.magnitude > 10)
+        return freqMagPair.magnitude;
     });
   });
   return bestFitPerBin;
