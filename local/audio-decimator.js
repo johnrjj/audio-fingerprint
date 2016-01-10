@@ -1,3 +1,4 @@
+//Downsamples the filtered signal by M (factor); that is, keep only every Mth sample.
 'use strict';
 var _ = require('lodash');
 

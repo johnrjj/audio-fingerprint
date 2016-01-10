@@ -14,7 +14,7 @@ function testme(path, cb) {
     context.decodeAudioData(data, function(decodedData) {
       var signal = decodedData.getChannelData(0);
 
-      var downsampled = downsample(signal, 44100, 11025);
+      var downsampled = downsample(signal, 44100, 11025, 1024);
 
       var hash = Hasher.createAudioHasher({
         'sampleRate': 11025,
