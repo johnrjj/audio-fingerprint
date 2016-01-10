@@ -1,9 +1,9 @@
 // Driver - takes an audio signal, downsamples, then fast fourier transforms the signal,
 // and returns the transformed windows in an array.
 'use strict';
-var _ = require('lodash');
-var downsample = require('./audio-downsampler');
-var fft = require('./audio-fft');
+let _ = require('lodash');
+let downsample = require('./audio-downsampler');
+let fft = require('./audio-fft');
 
 function convert(signal, originalFrequency, targetFrequency, windowSize) {
   // Downsample audio to spec

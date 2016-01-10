@@ -1,7 +1,7 @@
 // stuff
 'use strict';
-var _ = require('lodash');
-var binRanges = [
+let _ = require('lodash');
+let binRanges = [
   [0, 10], //very low
   [10, 20], //low
   [20, 40], //low-mid
@@ -11,7 +11,7 @@ var binRanges = [
 ];
 
 module.exports = function x(windows) {
-  
+
 }
 
 
