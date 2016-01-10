@@ -5,7 +5,6 @@ var windowFilter = require('./audio-window-filter');
 var decimator = require('./audio-decimator');
 var dsp = require('./dsp');
 
-
 module.exports = function(signal, origFrequency, targetFrequency, windowLength) {
   var windowLength = windowLength || signal.length;
   if (origFrequency < targetFrequency) {
@@ -21,11 +20,9 @@ module.exports = function(signal, origFrequency, targetFrequency, windowLength) 
   let filter = new dsp.IIRFilter(dsp.LOWPASS, cutoffFrequency, 1, origFrequency);
   // Apply low-pass filter in place
   filter.process(signal);
-
   //Decimate signal to factor we want
-  let decimateFactor = Math.floor((origFrequency / targetFrequency));
+  let decimateFactor = Math.floor(origFrequency / targetFrequency);
   let decimatedSignal = decimator(signal, decimateFactor);
-
   // Applying hamming window to prevent spectrum leakage, in place
   let chunksToWindowFilter = _.chunk(decimatedSignal, windowLength);
   _.forEach(chunksToWindowFilter, chunk => {
