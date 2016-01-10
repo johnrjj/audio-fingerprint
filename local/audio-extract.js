@@ -16,8 +16,8 @@ module.exports = function x(windows) {
 
 
 function computeBestFitForEachBin(groupedBins) {
-  let bestFitPerBin = _.map(groupedBins, function(binCollection) {
-    return _.max(binCollection, function(freqMagPair) {
+  let bestFitPerBin = _.map(groupedBins, binCollection => {
+    return _.max(binCollection, freqMagPair => {
       // if(freqMagPair.magnitude > 10)
         return freqMagPair.magnitude;
     });
@@ -26,8 +26,8 @@ function computeBestFitForEachBin(groupedBins) {
 };
 
 function groupDataChunkToBins(freqMagnitudeArray, binRanges) {
-  let groupedBinsData = _.map(binRanges, function(rangePair) {
-    return _.filter(freqMagnitudeArray, function(freqMagnitudePair) {
+  let groupedBinsData = _.map(binRanges, rangePair => {
+    return _.filter(freqMagnitudeArray, freqMagnitudePair => {
       let low = rangePair[0];
       let high = rangePair[1]
       return freqMagnitudePair.frequency >= low && freqMagnitudePair.frequency < high;
