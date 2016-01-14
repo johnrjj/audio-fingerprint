@@ -10,13 +10,13 @@ function convert(signal, originalFrequency, targetFrequency, windowSize) {
   let downsampled = downsample(signal, originalFrequency, targetFrequency, windowSize);
   // Divide the downsampled audio into windows (chunks)
   let audioWindows = _.chunk(downsampled, windowSize);
-  // If incomplete chunk at the end (wasn't chunk.length % windowSize != 0), toss it
-  if (_.last(audioWindows).length < windowSize) {
+  // If incomplete chunk at the end (chunk.length % windowSize != 0), toss it
+  if (_.last(audioWindows).length < windowSize-1) {
     audioWindows = _.dropRight(audioWindows);
   }
   // Run FFT on each window
-  let transformedWindows = _.map(audioWindows, audioWindow => {
-    return fft(audioWindow, windowSize);
+  let transformedWindows = _.map(audioWindows, (audioWindow) => {
+    return fft(audioWindow, windowSize); // oh shit should this be targetFrequency ??!??!?!!?!??
   });
   return transformedWindows;
 };

@@ -9,6 +9,7 @@ var glob = require('glob');
 var context = new AudioContext();
 var downsample = require('./audio-downsampler');
 var audioConverter = require('./audio-convert');
+var audioExtracter = require('./audio-extract');
 
 function testme(path, cb) {
   fs.readFile('./audio_files/440hz.mp3', function(err, data) {
@@ -17,17 +18,21 @@ function testme(path, cb) {
 
       var converted = audioConverter(signal, 44100, 11025, 1024)
 
-      
-      console.log(converted);
+      var extracted = audioExtracter(converted);
+
+      // console.log(converted);
+      // console.log(signal);
+
+      // console.log(converted);
+
       // var downsampled = downsample(signal, 44100, 11025, 1024);
-      //
+
       // var hash = Hasher.createAudioHasher({
       //   'sampleRate': 11025,
       //   'chunkSize': 1024,
       // });
-      //
-      // console.log(hash.transform(downsampled));
 
+      // console.log(hash.transform(downsampled)[5]);
     });
   });
 };
