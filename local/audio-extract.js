@@ -27,11 +27,10 @@ module.exports = function x(computedWindows) {
       throw 'this shouldnt happen...please adjust binRanges to include all freq values'
       return -1;
     });
-
     return groupedWindow
   });
 
-  // For each window, find the max for each bin, 
+  // For each window, find the max for each bin,
   let groupedMaxWindows = _.map(groupedWindows, (groupedWindow) => {
     let groupedMaxes = _.map(groupedWindow, (group) => {
       return _.max(group, (freqMagPair) => freqMagPair.magnitude);
@@ -53,7 +52,6 @@ module.exports = function x(computedWindows) {
       return (freqMagPair.magnitude > windowsMovingAverages[windowIndex]);
     });
   });
-
   // Return a list of points that are supposedly 'features'
   // (e.g. what we think are important audio points in the audio sample)
   return filteredPoints;
