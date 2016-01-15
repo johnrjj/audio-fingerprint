@@ -2,6 +2,9 @@
 let _ = require('lodash');
 //example: x(array, 1024, 11025, 0)
 //probably a prettier way to do this
+
+// Takes an array of audiosample windows and applies a timeoffset to the audioArray
+// based on the window size, sample rate, and provided time offset
 module.exports = function x(audioArray, audioWindowSize, sampleRate, timeOffset) {
   return _.map(audioArray, (chosenFeaturesPerWindow, index) => {
     let time = ((index * audioWindowSize / sampleRate) + timeOffset);
