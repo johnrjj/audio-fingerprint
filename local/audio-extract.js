@@ -14,8 +14,8 @@ const binRanges = [
 
 // refactor this, it's fugly
 module.exports = function x(computedWindows) {
-  // Group each window into the bins above, then find the max for each bin, for each window
-  let groupedMaxWindows = _.map(computedWindows, (aWindow) => {
+  // Group each window into the bins above,
+  let groupedWindows = _.map(computedWindows, (aWindow) => {
     let groupedWindow = _.groupBy(aWindow, (keyVal, index) => {
       for(var i = 0; i < binRanges.length; i++){
         let low = binRanges[i][0];
@@ -28,6 +28,11 @@ module.exports = function x(computedWindows) {
       return -1;
     });
 
+    return groupedWindow
+  });
+
+  // For each window, find the max for each bin, 
+  let groupedMaxWindows = _.map(groupedWindows, (groupedWindow) => {
     let groupedMaxes = _.map(groupedWindow, (group) => {
       return _.max(group, (freqMagPair) => freqMagPair.magnitude);
     });
