@@ -12,6 +12,8 @@ let binRanges = [
 ];
 let windowSize = 100;
 
+
+// refactor this, it's fugly
 module.exports = function x(computedWindows) {
   let groupedMaxWindows = _.map(computedWindows, (aWindow) => {
     let groupedWindow = _.groupBy(aWindow, (keyVal, index) => {
@@ -29,44 +31,41 @@ module.exports = function x(computedWindows) {
     let groupedMaxes = _.map(groupedWindow, (group) => {
       return _.max(group, (freqMagPair) => freqMagPair.magnitude);
     });
-
     return groupedMaxes
-
-    // other idea: map each binpair, filter the window
-    // let groupedWindow2 = _.map(binRanges, (rangePair) => {
-    //   _
-    // });
   });
+
   let groupedWindowsAverages = _.map(groupedMaxWindows, (groupedMaxWindow) => {
     return mathUtil.average(groupedMaxWindow, 'magnitude');
   });
 
   let windowsMovingAverages = mathUtil.simple_moving_average(groupedWindowsAverages, windowSize);
-  console.log(windowsMovingAverages);
-  return groupedMaxWindows;
-};
 
-
-
-  // math.movingAvg([1,2,3,4,5], 3);
-  //   => [2,3,4]
-function computeBestFitForEachBin(groupedBins) {
-  let bestFitPerBin = _.map(groupedBins, (binCollection) => {
-    return _.max(binCollection, (freqMagPair) => {
-      // if(freqMagPair.magnitude > 10)
-        return freqMagPair.magnitude;
+  let filteredPoints = _.map(groupedMaxWindows, (aWindow, windowIndex) => {
+    return _.filter(aWindow, (freqMagPair) => {
+      return (freqMagPair.magnitude > windowsMovingAverages[windowIndex]);
     });
   });
-  return bestFitPerBin;
+
+  return filteredPoints;
 };
 
-function groupDataChunkToBins(freqMagnitudeArray, binRanges) {
-  let groupedBinsData = _.map(binRanges, (rangePair) => {
-    return _.filter(freqMagnitudeArray, (freqMagnitudePair) => {
-      let low = rangePair[0];
-      let high = rangePair[1]
-      return freqMagnitudePair.frequency >= low && freqMagnitudePair.frequency < high;
-    });
-  });
-  return groupedBinsData;
-};
+// function computeBestFitForEachBin(groupedBins) {
+//   let bestFitPerBin = _.map(groupedBins, (binCollection) => {
+//     return _.max(binCollection, (freqMagPair) => {
+//       // if(freqMagPair.magnitude > 10)
+//         return freqMagPair.magnitude;
+//     });
+//   });
+//   return bestFitPerBin;
+// };
+//
+// function groupDataChunkToBins(freqMagnitudeArray, binRanges) {
+//   let groupedBinsData = _.map(binRanges, (rangePair) => {
+//     return _.filter(freqMagnitudeArray, (freqMagnitudePair) => {
+//       let low = rangePair[0];
+//       let high = rangePair[1]
+//       return freqMagnitudePair.frequency >= low && freqMagnitudePair.frequency < high;
+//     });
+//   });
+//   return groupedBinsData;
+// };

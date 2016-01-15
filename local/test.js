@@ -10,6 +10,7 @@ var context = new AudioContext();
 var downsample = require('./audio-downsampler');
 var audioConverter = require('./audio-convert');
 var audioExtracter = require('./audio-extract');
+var audioTimeOffset = require('./audio-timeoffset');
 
 function testme(path, cb) {
   fs.readFile('./audio_files/440hz.mp3', function(err, data) {
@@ -19,6 +20,12 @@ function testme(path, cb) {
       var converted = audioConverter(signal, 44100, 11025, 1024)
 
       var extracted = audioExtracter(converted);
+
+      var sit = audioTimeOffset(extracted, 1024, 11025, 0);
+
+      var flattenedSit = _.flatten(sit);
+
+      console.log(flattenedSit);
 
       // console.log(converted);
       // console.log(signal);
