@@ -11,6 +11,7 @@ var downsample = require('./audio-downsampler');
 var audioConverter = require('./audio-convert');
 var audioExtracter = require('./audio-extract');
 var audioTimeOffset = require('./audio-timeoffset');
+var targetZoneGenerator = require('./generate-target-zone');
 
 function testme(path, cb) {
   fs.readFile('./audio_files/440hz.mp3', function(err, data) {
@@ -25,7 +26,12 @@ function testme(path, cb) {
 
       var flattenedSit = _.flatten(sit);
 
+      // targetZoneGenerator(flattenedSit);
+
       console.log(flattenedSit);
+
+      console.log('generating target zones');
+      targetZoneGenerator(flattenedSit, 3, 5);
 
       // console.log(converted);
       // console.log(signal);
