@@ -1,7 +1,33 @@
 'use strict';
 let _ = require('lodash');
 
+function standardDeviation(values){
+  var avg = mean(values);
+
+  var squareDiffs = values.map(function(value){
+    var diff = value - avg;
+    var sqrDiff = diff * diff;
+    return sqrDiff;
+  });
+
+  var avgSquareDiff = mean(squareDiffs);
+
+  var stdDev = Math.sqrt(avgSquareDiff);
+  return stdDev;
+}
+
+function mean(data){
+  var sum = data.reduce(function(sum, value){
+    return sum + value;
+  }, 0);
+
+  var avg = sum / data.length;
+  return avg;
+}
+
 module.exports = {
+  standardDeviation: standardDeviation,
+
   simple_moving_average: function(arr, size, calcAllSizeWindows) {
     calcAllSizeWindows = calcAllSizeWindows || true;
     let win, i, newarr = [];

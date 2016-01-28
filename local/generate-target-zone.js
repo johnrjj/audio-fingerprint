@@ -2,9 +2,9 @@
 let _ = require('lodash');
 
 module.exports = function generate(audioArray, anchorOffset, zoneSize) {
-  console.log(audioArray);
-  console.log(anchorOffset);
-  console.log(zoneSize);
+  // console.log(audioArray);
+  // console.log(anchorOffset);
+  // console.log(zoneSize);
 
   let allZonesAddresses = _.map(audioArray, (element, index) => {
     let anchor = index;
@@ -26,7 +26,7 @@ module.exports = function generate(audioArray, anchorOffset, zoneSize) {
     };
     return zoneAddresses;
   });
-  console.log(allZonesAddresses);
+  // console.log(allZonesAddresses);
   return allZonesAddresses;
 }
 

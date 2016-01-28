@@ -3,6 +3,7 @@
 let _ = require('lodash');
 let mathUtil = require('./math-util');
 const movingAverageWindowSize = 100;
+const stdDevCoef = 3;
 const binRanges = [
   [0, 9], //very low
   [10, 19], //low
@@ -11,6 +12,7 @@ const binRanges = [
   [80, 159], //mid-high
   [160, 511], //high
 ];
+
 
 // refactor this, it's fugly
 module.exports = function x(computedWindows) {
@@ -46,10 +48,15 @@ module.exports = function x(computedWindows) {
   // Convert those window (magnitude) averages into moving (magnitude) averages
   let windowsMovingAverages = mathUtil.simple_moving_average(groupedWindowsAverages, movingAverageWindowSize);
 
+  // need to make this standard deviation sliding
+  let standardDeviation = mathUtil.standardDeviation(windowsMovingAverages);
+  // console.log(standardDeviation);
+
   // Per window, accept only the audio points that are greater than the moving average magnitude of that window
   let filteredPoints = _.map(groupedMaxWindows, (aWindow, windowIndex) => {
     return _.filter(aWindow, (freqMagPair) => {
-      return (freqMagPair.magnitude > windowsMovingAverages[windowIndex]);
+      console.log(standardDeviation);
+      return (freqMagPair.magnitude > (windowsMovingAverages[windowIndex] + (standardDeviation * stdDevCoef)));
     });
   });
   // Return a list of points that are supposedly 'features'

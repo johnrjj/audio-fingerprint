@@ -12,40 +12,31 @@ var audioConverter = require('./audio-convert');
 var audioExtracter = require('./audio-extract');
 var audioTimeOffset = require('./audio-timeoffset');
 var targetZoneGenerator = require('./generate-target-zone');
+var addressLinkGenerator = require('./generate-address-link');
+var merger = require('./merge-address-link');
+var math = require('./math-util');
 
 function testme(path, cb) {
-  fs.readFile('./audio_files/440hz.mp3', function(err, data) {
+  fs.readFile('./audio_files/22.mp3', function(err, data) {
     context.decodeAudioData(data, function(decodedData) {
+      // Get the raw PCM signal
       var signal = decodedData.getChannelData(0);
 
+      //  Downsample signal, then run FFT on it
       var converted = audioConverter(signal, 44100, 11025, 1024)
 
+      // Group audio into windows, then group frequencies into bins per window
       var extracted = audioExtracter(converted);
 
-      var sit = audioTimeOffset(extracted, 1024, 11025, 0);
+      // Apply timeoffsets to all audio data points (right now theyre all in order)
+      var extractedWithTimeOffsets = audioTimeOffset(extracted, 1024, 11025, 0);
 
-      var flattenedSit = _.flatten(sit);
+      // Flatten the list, now that we have the chosen audio points w/ correct time offsets
+      var flattenedExtractedAudio = _.flatten(extractedWithTimeOffsets);
 
-      // targetZoneGenerator(flattenedSit);
+      let targetZones = targetZoneGenerator(flattenedExtractedAudio, 3, 5);
 
-      console.log(flattenedSit);
-
-      console.log('generating target zones');
-      targetZoneGenerator(flattenedSit, 3, 5);
-
-      // console.log(converted);
-      // console.log(signal);
-
-      // console.log(converted);
-
-      // var downsampled = downsample(signal, 44100, 11025, 1024);
-
-      // var hash = Hasher.createAudioHasher({
-      //   'sampleRate': 11025,
-      //   'chunkSize': 1024,
-      // });
-
-      // console.log(hash.transform(downsampled)[5]);
+      let addressLinks = addressLinkGenerator(flattenedExtractedAudio, 0, 1337);
     });
   });
 };
