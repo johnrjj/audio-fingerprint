@@ -48,15 +48,22 @@ module.exports = function x(computedWindows) {
   // Convert those window (magnitude) averages into moving (magnitude) averages
   let windowsMovingAverages = mathUtil.simple_moving_average(groupedWindowsAverages, movingAverageWindowSize);
 
+
+  let standardDeviations = _.map(windowsMovingAverages, (avg, ix) => {
+    console.log(avg);
+    console.log(ix);
+    return mathUtil.standardDeviation(windowsMovingAverages);
+  });
+
   // need to make this standard deviation sliding
-  let standardDeviation = mathUtil.standardDeviation(windowsMovingAverages);
+  // let standardDeviation = mathUtil.standardDeviation(windowsMovingAverages);
   // console.log(standardDeviation);
 
   // Per window, accept only the audio points that are greater than the moving average magnitude of that window
   let filteredPoints = _.map(groupedMaxWindows, (aWindow, windowIndex) => {
     return _.filter(aWindow, (freqMagPair) => {
       console.log(standardDeviation);
-      return (freqMagPair.magnitude > (windowsMovingAverages[windowIndex] + (standardDeviation * stdDevCoef)));
+      return (freqMagPair.magnitude > (windowsMovingAverages[windowIndex] + (standardDeviations[windowIndex] * stdDevCoef)));
     });
   });
   // Return a list of points that are supposedly 'features'

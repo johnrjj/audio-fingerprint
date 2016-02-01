@@ -17,7 +17,7 @@ var merger = require('./merge-address-link');
 var math = require('./math-util');
 
 function testme(path, cb) {
-  fs.readFile('./audio_files/22.mp3', function(err, data) {
+  fs.readFile('./audio_files/440hz.mp3', function(err, data) {
     context.decodeAudioData(data, function(decodedData) {
       // Get the raw PCM signal
       var signal = decodedData.getChannelData(0);
