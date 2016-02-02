@@ -15,7 +15,7 @@ describe('Audio Timeoffseter', function() {
          },
        ]];
       var audioWindowSize = 2;
-      var sampleRate = 44100;
+      var sampleRate = 1;
       var timeOffset = 0;
       var timeoffsetObj = timeoffset(audioWindows, audioWindowSize, sampleRate, timeOffset);
       timeoffsetObj.should.be.deep.equal(
@@ -47,7 +47,7 @@ describe('Audio Timeoffseter', function() {
          },
        ]];
       var audioWindowSize = 2;
-      var sampleRate = 44100;
+      var sampleRate = 1;
       var timeOffset = 1;
       var timeoffsetObj = timeoffset(audioWindows, audioWindowSize, sampleRate, timeOffset);
       timeoffsetObj.should.be.deep.equal(
