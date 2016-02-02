@@ -1,6 +1,5 @@
 'use strict';
 var decimator = require('../local/audio-decimator');
-
 var assert = require('chai').should();
 
 describe('Audio Decimator', function() {
@@ -34,6 +33,4 @@ describe('Audio Decimator', function() {
       var decimatedSignal = decimator(signal, decimateFactor);
       decimatedSignal.should.be.deep.equal([1]);
   });
-
-
 });
