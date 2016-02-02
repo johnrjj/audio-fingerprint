@@ -27,7 +27,7 @@ function testme(path, cb) {
 
       // Group audio into windows, then group frequencies into bins per window
       var extracted = audioExtracter(converted);
-
+      console.log(extracted);
       // Apply timeoffsets to all audio data points (right now theyre all in order)
       var extractedWithTimeOffsets = audioTimeOffset(extracted, 1024, 11025, 0);
 

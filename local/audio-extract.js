@@ -62,7 +62,7 @@ module.exports = function x(computedWindows) {
   // Per window, accept only the audio points that are greater than the moving average magnitude of that window
   let filteredPoints = _.map(groupedMaxWindows, (aWindow, windowIndex) => {
     return _.filter(aWindow, (freqMagPair) => {
-      console.log(standardDeviation);
+      // console.log(standardDeviation);
       return (freqMagPair.magnitude > (windowsMovingAverages[windowIndex] + (standardDeviations[windowIndex] * stdDevCoef)));
     });
   });
