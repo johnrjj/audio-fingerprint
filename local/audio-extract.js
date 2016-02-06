@@ -3,7 +3,7 @@
 let _ = require('lodash');
 let mathUtil = require('./math-util');
 const movingAverageWindowSize = 100;
-const stdDevCoef = 3;
+const stdDevCoef = 2;
 const binRanges = [
   [0, 9], //very low
   [10, 19], //low
@@ -16,6 +16,9 @@ const binRanges = [
 
 // refactor this, it's fugly
 module.exports = function x(computedWindows) {
+  // console.log(computedWindows);
+  // console.log(computedWindows.length);
+
   // Group each window into the bins above,
   let groupedWindows = _.map(computedWindows, (aWindow) => {
     let groupedWindow = _.groupBy(aWindow, (keyVal, index) => {
@@ -31,6 +34,7 @@ module.exports = function x(computedWindows) {
     });
     return groupedWindow
   });
+  // console.log(groupedWindows);
 
   // For each window, find the max for each bin,
   let groupedMaxWindows = _.map(groupedWindows, (groupedWindow) => {
@@ -40,20 +44,50 @@ module.exports = function x(computedWindows) {
     return groupedMaxes
   });
 
+  // console.log(groupedMaxWindows);
+  // console.log(groupedMaxWindows.length);
+  let filteringData = [];
+  // note this cuts off towards the end, need better algo
+  for(var i = 0; i < groupedMaxWindows.length; i++) {
+    let windowRange = groupedMaxWindows.slice(i, i + movingAverageWindowSize);
+    // console.log(windowRange.length);
+    // console.log(windowRange);
+    let range = _.flatten(windowRange);
+    // console.log(range);
+    let rangeAvg = mathUtil.average(range, 'magnitude');
+    let rangeStdDev = mathUtil.standardDeviation(_.map(range, 'magnitude'));
+    // console.log(range);
+    console.log('window #' + i);
+    console.log('avg: ' + rangeAvg);
+    console.log('stdev ' + rangeStdDev);
+
+    let temp = {
+      average: rangeAvg,
+      standardDeviation: rangeStdDev,
+    };
+
+    filteringData[i] = temp;
+  }
+
+  // console.log(filteringData);
+
+
   // Find the average of each window, by averaging all max bins per window
-  let groupedWindowsAverages = _.map(groupedMaxWindows, (groupedMaxWindow) => {
-    return mathUtil.average(groupedMaxWindow, 'magnitude');
-  });
+  // let groupedWindowsAverages = _.map(groupedMaxWindows, (groupedMaxWindow) => {
+  //   // console.log(groupedMaxWindow);
+  //   return mathUtil.average(groupedMaxWindow, 'magnitude');
+  // });
+
 
   // Convert those window (magnitude) averages into moving (magnitude) averages
-  let windowsMovingAverages = mathUtil.simple_moving_average(groupedWindowsAverages, movingAverageWindowSize);
+  // let windowsMovingAverages = mathUtil.simple_moving_average(groupedWindowsAverages, movingAverageWindowSize);
 
 
-  let standardDeviations = _.map(windowsMovingAverages, (avg, ix) => {
-    console.log(avg);
-    console.log(ix);
-    return mathUtil.standardDeviation(windowsMovingAverages);
-  });
+  // let standardDeviations = _.map(windowsMovingAverages, (avg, ix) => {
+  //   // console.log(avg);
+  //   // console.log(ix);
+  //   return mathUtil.standardDeviation(windowsMovingAverages);
+  // });
 
   // need to make this standard deviation sliding
   // let standardDeviation = mathUtil.standardDeviation(windowsMovingAverages);
@@ -63,10 +97,13 @@ module.exports = function x(computedWindows) {
   let filteredPoints = _.map(groupedMaxWindows, (aWindow, windowIndex) => {
     return _.filter(aWindow, (freqMagPair) => {
       // console.log(standardDeviation);
-      return (freqMagPair.magnitude > (windowsMovingAverages[windowIndex] + (standardDeviations[windowIndex] * stdDevCoef)));
+      return (freqMagPair.magnitude > (filteringData[windowIndex].average + (filteringData[windowIndex].standardDeviation * stdDevCoef)));
     });
   });
   // Return a list of points that are supposedly 'features'
   // (e.g. what we think are important audio points in the audio sample)
+  console.log(filteredPoints);
+  console.log(_.flatten(filteredPoints).length);
+
   return filteredPoints;
 };

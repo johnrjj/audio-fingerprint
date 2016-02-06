@@ -52,7 +52,7 @@ module.exports = {
       arr = obj;
     } else {
       key = key || 'value';
-      arr = _.pluck(obj, key);
+      arr = _.map(obj, key);
     }
     let val = 0, i;
     for (i = 0; i < arr.length; i++)
