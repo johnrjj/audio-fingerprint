@@ -12,7 +12,8 @@ module.exports = function x(audioWindows, audioWindowSize, sampleRate, timeOffse
     let time = ((index * audioWindowSize / sampleRate) + timeOffset);
     // Apply time to each point in window. (immutable tho, hence clone)
     return _.map(audioWindow, (audioPointInWindow) => {
-      let temp = _.cloneDeep(audioPointInWindow);
+      let temp = {}
+      temp = _.cloneDeep(audioPointInWindow);
       temp.time = time;
       return temp;
     });

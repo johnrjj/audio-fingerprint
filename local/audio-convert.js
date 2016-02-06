@@ -8,6 +8,7 @@ let fft = require('./audio-fft');
 function convert(signal, originalFrequency, targetFrequency, windowSize) {
   // Downsample audio to spec
   let downsampled = downsample(signal, originalFrequency, targetFrequency, windowSize);
+  // console.log(downsampled.length);
   // Divide the downsampled audio into windows (chunks)
   let audioWindows = _.chunk(downsampled, windowSize);
   // If incomplete chunk at the end (chunk.length % windowSize != 0), toss it

@@ -17,12 +17,19 @@ module.exports = function generate(audioArray, anchorOffset, zoneSize) {
     for(var i = startingIndexOfZone; i < (startingIndexOfZone + zoneSize); i++) {
       let addressArr = [];
       //[“frequency of the  anchor”;” frequency of the  point”;”delta time between the anchor and the point”].
-      addressArr.push(audioArray[anchor].frequency);
-      addressArr.push(audioArray[i].frequency);
+      // addressArr.push(audioArray[anchor].frequency);
+      // addressArr.push(audioArray[i].frequency);
       let deltaTime = Math.abs(audioArray[i].time - audioArray[anchor].time);
-      addressArr.push(deltaTime);
-      // console.log(addressArr);
-      zoneAddresses.push(addressArr);
+      // addressArr.push(deltaTime);
+      // // console.log(addressArr);
+      // zoneAddresses.push(addressArr);
+
+      let address = {
+        anchorFreq: audioArray[anchor].frequency,
+        pointFreq: audioArray[i].frequency,
+        timeDelta: deltaTime,
+      }
+      zoneAddresses.push(address);
     };
     return zoneAddresses;
   });

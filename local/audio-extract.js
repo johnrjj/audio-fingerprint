@@ -3,7 +3,7 @@
 let _ = require('lodash');
 let mathUtil = require('./math-util');
 const movingAverageWindowSize = 100;
-const stdDevCoef = 2;
+const stdDevCoef = 0.5;
 const binRanges = [
   [0, 9], //very low
   [10, 19], //low
@@ -49,7 +49,20 @@ module.exports = function x(computedWindows) {
   let filteringData = [];
   // note this cuts off towards the end, need better algo
   for(var i = 0; i < groupedMaxWindows.length; i++) {
-    let windowRange = groupedMaxWindows.slice(i, i + movingAverageWindowSize);
+
+    let bound = Math.floor(movingAverageWindowSize/2);
+
+    let low = i - bound;
+    if(low < 0) {
+      low = 0;
+    }
+    let high = i + bound; // slice dont care
+    if (high >= groupedMaxWindows.length) {
+      high = groupedMaxWindows.length - 1;
+    }
+
+    // console.log('low ' + low + '\thigh ' + high);
+    let windowRange = groupedMaxWindows.slice(low, high);
     // console.log(windowRange.length);
     // console.log(windowRange);
     let range = _.flatten(windowRange);
@@ -57,9 +70,9 @@ module.exports = function x(computedWindows) {
     let rangeAvg = mathUtil.average(range, 'magnitude');
     let rangeStdDev = mathUtil.standardDeviation(_.map(range, 'magnitude'));
     // console.log(range);
-    console.log('window #' + i);
-    console.log('avg: ' + rangeAvg);
-    console.log('stdev ' + rangeStdDev);
+    // console.log('window #' + i);
+    // console.log('avg: ' + rangeAvg);
+    // console.log('stdev ' + rangeStdDev);
 
     let temp = {
       average: rangeAvg,
@@ -102,8 +115,8 @@ module.exports = function x(computedWindows) {
   });
   // Return a list of points that are supposedly 'features'
   // (e.g. what we think are important audio points in the audio sample)
-  console.log(filteredPoints);
-  console.log(_.flatten(filteredPoints).length);
+  // console.log(filteredPoints);
+  // console.log(_.flatten(filteredPoints).length);
 
   return filteredPoints;
 };
