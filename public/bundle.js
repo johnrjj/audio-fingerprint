@@ -54,7 +54,7 @@
 /******/ 	
 /******/ 	
 /******/ 	var hotApplyOnUpdate = true;
-/******/ 	var hotCurrentHash = "26bc7ed8cecf167f4f69"; // eslint-disable-line no-unused-vars
+/******/ 	var hotCurrentHash = "67bdd2cbc7698173a105"; // eslint-disable-line no-unused-vars
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentParents = []; // eslint-disable-line no-unused-vars
 /******/ 	
@@ -28048,10 +28048,6 @@
 	
 	var _AudioRecorderStyle2 = _interopRequireDefault(_AudioRecorderStyle);
 	
-	var _worker = __webpack_require__(254);
-	
-	var _worker2 = _interopRequireDefault(_worker);
-	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -28059,6 +28055,8 @@
 	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 	
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var Worker = __webpack_require__(254);
 	
 	var AudioRecorder = function (_Component) {
 	  _inherits(AudioRecorder, _Component);
@@ -28168,7 +28166,7 @@
 	          console.log(audioBufferToPassToWorker.length);
 	          var sampleRate = buffer.sampleRate;
 	
-	          var worker = new _worker2.default();
+	          var worker = new Worker();
 	          // attach handler
 	          worker.onmessage = function (e) {
 	            console.log('Message received from worker');

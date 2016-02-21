@@ -1,7 +1,7 @@
 // stuff
 'use strict';
-let _ = require('lodash');
-let mathUtil = require('./math-util');
+var _ = require('lodash');
+var mathUtil = require('./math-util');
 const movingAverageWindowSize = 100;
 const stdDevCoef = 0.5;
 const binRanges = [

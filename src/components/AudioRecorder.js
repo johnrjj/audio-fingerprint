@@ -1,7 +1,8 @@
 import React, { Component, PropTypes } from 'react';
 import encodeWAV from './wav-encoder.js';
 import styles from './AudioRecorderStyle.scss';
-import MyWorker from 'worker!./worker.js';
+var Worker = require("worker!./worker");
+
 
 class AudioRecorder extends Component {
   constructor(props) {
@@ -102,7 +103,7 @@ class AudioRecorder extends Component {
         console.log(audioBufferToPassToWorker.length);
         let sampleRate = buffer.sampleRate;
 
-        var worker = new MyWorker();
+        var worker = new Worker;
         // attach handler
         worker.onmessage = function(e) {
           console.log('Message received from worker');
