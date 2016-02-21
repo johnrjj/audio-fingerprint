@@ -5,7 +5,7 @@ let _ = require('lodash');
 let downsample = require('./audio-downsampler');
 let fft = require('./audio-fft');
 
-function convert(signal, originalFrequency, targetFrequency, windowSize) {
+module.exports = function(signal, originalFrequency, targetFrequency, windowSize) {
   // Downsample audio to spec
   let downsampled = downsample(signal, originalFrequency, targetFrequency, windowSize);
   // console.log(downsampled.length);
@@ -21,5 +21,3 @@ function convert(signal, originalFrequency, targetFrequency, windowSize) {
   });
   return transformedWindows;
 };
-
-module.exports = convert;

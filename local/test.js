@@ -1,13 +1,8 @@
-// require('babel-register')({
-//    presets: [ 'es2015' ]
-// });
 'use strict';
 var fs = require('fs');
 var AudioContext = require('web-audio-api').AudioContext;
 var argv = require('yargs').argv;
 var _ = require('lodash');
-var Hasher = require('./audioHasher');
-var time = require('./audioChrono');
 var glob = require('glob');
 var context = new AudioContext();
 

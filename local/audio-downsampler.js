@@ -1,9 +1,9 @@
 // Downsampling using a low-pass filter, linear inteprelation decimation, then hamming window
 'use strict';
-let _ = require('lodash');
-let windowFilter = require('./audio-window-filter');
-let decimator = require('./audio-decimator');
-let dsp = require('./dsp');
+var _ = require('lodash');
+var windowFilter = require('./audio-window-filter');
+var decimator = require('./audio-decimator');
+var dsp = require('./dsp');
 
 module.exports = function(signal, origFrequency, targetFrequency, windowLength) {
   var windowLength = windowLength || signal.length;
