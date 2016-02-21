@@ -8,7 +8,7 @@ var context = new AudioContext();
 var MongoClient = require('mongodb').MongoClient;
 var assert = require('assert');
 var ObjectId = require('mongodb').ObjectID;
-var fingerprinter = require('./audio-fingerprint');
+var fingerprinter = require('../lib/audio-fingerprint');
 
 function dbInteract(objArray, dbUrl, callback) {
   let url = dbUrl;

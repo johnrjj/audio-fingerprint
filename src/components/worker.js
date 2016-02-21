@@ -1,7 +1,7 @@
 
 var _ = require('lodash');
-var fingerprint = require('../../local/audio-test');
-var test = require('../../local/audio-fingerprint');
+var fingerprint = require('../../lib/audio-fingerprint');
+// var test = require('../../lib/audio-fingerprint');
 onmessage = function(e) {
 	// console.log('here!!!');
 	// throw 'hello';
@@ -10,7 +10,7 @@ onmessage = function(e) {
 	// console.log(floats);
 	// console.log(floats);
 	// fingerprint();
-	var res = test(floats, 44100, 11025);
+	var res = fingerprint(floats, 44100, 11025);
 	console.log(res);
 	postMessage(res);
 	close();
