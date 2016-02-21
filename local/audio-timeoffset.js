@@ -5,9 +5,10 @@ let _ = require('lodash');
 
 // Takes an array of audiosample windows and applies a timeoffset to the audioArray
 // based on the window size, sample rate, and provided time offset
-module.exports = function x(audioWindows, audioWindowSize, sampleRate, timeOffset) {
+module.exports = function(audioWindows, audioWindowSize, sampleRate, timeOffset) {
   // For each window...
   return _.map(audioWindows, (audioWindow, index) => {
+    // console.log(index);
     // Calc cur time for window
     let time = ((index * audioWindowSize / sampleRate) + timeOffset);
     // Apply time to each point in window. (immutable tho, hence clone)

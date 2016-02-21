@@ -54,7 +54,7 @@
 /******/ 	
 /******/ 	
 /******/ 	var hotApplyOnUpdate = true;
-/******/ 	var hotCurrentHash = "cdac35aaaf9fe8d46191"; // eslint-disable-line no-unused-vars
+/******/ 	var hotCurrentHash = "26bc7ed8cecf167f4f69"; // eslint-disable-line no-unused-vars
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentParents = []; // eslint-disable-line no-unused-vars
 /******/ 	
@@ -77,33 +77,47 @@
 /******/ 		};
 /******/ 		for(var name in __webpack_require__) {
 /******/ 			if(Object.prototype.hasOwnProperty.call(__webpack_require__, name)) {
-/******/ 				fn[name] = __webpack_require__[name];
+/******/ 				Object.defineProperty(fn, name, (function(name) {
+/******/ 					return {
+/******/ 						configurable: true,
+/******/ 						enumerable: true,
+/******/ 						get: function() {
+/******/ 							return __webpack_require__[name];
+/******/ 						},
+/******/ 						set: function(value) {
+/******/ 							__webpack_require__[name] = value;
+/******/ 						}
+/******/ 					};
+/******/ 				}(name)));
 /******/ 			}
 /******/ 		}
-/******/ 		fn.e = function(chunkId, callback) {
-/******/ 			if(hotStatus === "ready")
-/******/ 				hotSetStatus("prepare");
-/******/ 			hotChunksLoading++;
-/******/ 			__webpack_require__.e(chunkId, function() {
-/******/ 				try {
-/******/ 					callback.call(null, fn);
-/******/ 				} finally {
-/******/ 					finishChunkLoading();
-/******/ 				}
+/******/ 		Object.defineProperty(fn, "e", {
+/******/ 			enumerable: true,
+/******/ 			value: function(chunkId, callback) {
+/******/ 				if(hotStatus === "ready")
+/******/ 					hotSetStatus("prepare");
+/******/ 				hotChunksLoading++;
+/******/ 				__webpack_require__.e(chunkId, function() {
+/******/ 					try {
+/******/ 						callback.call(null, fn);
+/******/ 					} finally {
+/******/ 						finishChunkLoading();
+/******/ 					}
 /******/ 	
-/******/ 				function finishChunkLoading() {
-/******/ 					hotChunksLoading--;
-/******/ 					if(hotStatus === "prepare") {
-/******/ 						if(!hotWaitingFilesMap[chunkId]) {
-/******/ 							hotEnsureUpdateChunk(chunkId);
-/******/ 						}
-/******/ 						if(hotChunksLoading === 0 && hotWaitingFiles === 0) {
-/******/ 							hotUpdateDownloaded();
+/******/ 					function finishChunkLoading() {
+/******/ 						hotChunksLoading--;
+/******/ 						if(hotStatus === "prepare") {
+/******/ 							if(!hotWaitingFilesMap[chunkId]) {
+/******/ 								hotEnsureUpdateChunk(chunkId);
+/******/ 							}
+/******/ 							if(hotChunksLoading === 0 && hotWaitingFiles === 0) {
+/******/ 								hotUpdateDownloaded();
+/******/ 							}
 /******/ 						}
 /******/ 					}
-/******/ 				}
-/******/ 			});
-/******/ 		};
+/******/ 				});
+/******/ 			}
+/******/ 		});
 /******/ 		return fn;
 /******/ 	}
 /******/ 	
@@ -535,7 +549,7 @@
 /******/ 	__webpack_require__.c = installedModules;
 /******/
 /******/ 	// __webpack_public_path__
-/******/ 	__webpack_require__.p = "/public/";
+/******/ 	__webpack_require__.p = "/";
 /******/
 /******/ 	// __webpack_hash__
 /******/ 	__webpack_require__.h = function() { return hotCurrentHash; };
@@ -561,10 +575,13 @@
 	var SockJS = __webpack_require__(8);
 	var stripAnsi = __webpack_require__(72);
 	var scriptElements = document.getElementsByTagName("script");
+	var scriptHost = scriptElements[scriptElements.length-1].getAttribute("src").replace(/\/[^\/]+$/, "");
 	
+	// If this bundle is inlined, use the resource query to get the correct url.
+	// Else, get the url from the <script> this file was called with.
 	var urlParts = url.parse( true ?
 		__resourceQuery.substr(1) :
-		scriptElements[scriptElements.length-1].getAttribute("src").replace(/\/[^\/]+$/, "")
+		(scriptHost ? scriptHost : "/")
 	);
 	
 	var sock = null;
@@ -7915,16 +7932,17 @@
 			return lastData.indexOf(__webpack_require__.h()) >= 0;
 		};
 		var check = function check() {
-			module.hot.check(function(err, updatedModules) {
+			module.hot.check(true, function(err, updatedModules) {
 				if(err) {
 					if(module.hot.status() in {
 							abort: 1,
 							fail: 1
 						}) {
-						console.warn("[HMR] Cannot check for update. Need to do a full reload!");
+						console.warn("[HMR] Cannot apply update. Need to do a full reload!");
 						console.warn("[HMR] " + err.stack || err.message);
+						window.location.reload();
 					} else {
-						console.warn("[HMR] Update check failed: " + err.stack || err.message);
+						console.warn("[HMR] Update failed: " + err.stack || err.message);
 					}
 					return;
 				}
@@ -7932,35 +7950,20 @@
 				if(!updatedModules) {
 					console.warn("[HMR] Cannot find update. Need to do a full reload!");
 					console.warn("[HMR] (Probably because of restarting the webpack-dev-server)");
+					window.location.reload();
 					return;
 				}
 	
-				module.hot.apply({
-					ignoreUnaccepted: true
-				}, function(err, renewedModules) {
-					if(err) {
-						if(module.hot.status() in {
-								abort: 1,
-								fail: 1
-							}) {
-							console.warn("[HMR] Cannot apply update. Need to do a full reload!");
-							console.warn("[HMR] " + err.stack || err.message);
-						} else {
-							console.warn("[HMR] Update failed: " + err.stack || err.message);
-						}
-						return;
-					}
+				if(!upToDate()) {
+					check();
+				}
 	
-					if(!upToDate()) {
-						check();
-					}
+				__webpack_require__(75)(updatedModules, updatedModules);
 	
-					__webpack_require__(75)(updatedModules, renewedModules);
+				if(upToDate()) {
+					console.log("[HMR] App is up to date.");
+				}
 	
-					if(upToDate()) {
-						console.log("[HMR] App is up to date.");
-					}
-				});
 			});
 		};
 		var addEventListener = window.addEventListener ? function(eventName, listener) {
@@ -9579,7 +9582,7 @@
 	 * will remain to ensure logic does not differ in production.
 	 */
 	
-	var invariant = function (condition, format, a, b, c, d, e, f) {
+	function invariant(condition, format, a, b, c, d, e, f) {
 	  if (process.env.NODE_ENV !== 'production') {
 	    if (format === undefined) {
 	      throw new Error('invariant requires an error message argument');
@@ -9593,15 +9596,16 @@
 	    } else {
 	      var args = [a, b, c, d, e, f];
 	      var argIndex = 0;
-	      error = new Error('Invariant Violation: ' + format.replace(/%s/g, function () {
+	      error = new Error(format.replace(/%s/g, function () {
 	        return args[argIndex++];
 	      }));
+	      error.name = 'Invariant Violation';
 	    }
 	
 	    error.framesToPop = 1; // we don't care about invariant's own frame
 	    throw error;
 	  }
-	};
+	}
 	
 	module.exports = invariant;
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
@@ -17614,6 +17618,7 @@
 	 */
 	var EventInterface = {
 	  type: null,
+	  target: null,
 	  // currentTarget is set when dispatching; no use in copying it here
 	  currentTarget: emptyFunction.thatReturnsNull,
 	  eventPhase: null,
@@ -17647,8 +17652,6 @@
 	  this.dispatchConfig = dispatchConfig;
 	  this.dispatchMarker = dispatchMarker;
 	  this.nativeEvent = nativeEvent;
-	  this.target = nativeEventTarget;
-	  this.currentTarget = nativeEventTarget;
 	
 	  var Interface = this.constructor.Interface;
 	  for (var propName in Interface) {
@@ -17659,7 +17662,11 @@
 	    if (normalize) {
 	      this[propName] = normalize(nativeEvent);
 	    } else {
-	      this[propName] = nativeEvent[propName];
+	      if (propName === 'target') {
+	        this.target = nativeEventTarget;
+	      } else {
+	        this[propName] = nativeEvent[propName];
+	      }
 	    }
 	  }
 	
@@ -18822,8 +18829,8 @@
 	     */
 	    // autoCapitalize and autoCorrect are supported in Mobile Safari for
 	    // keyboard hints.
-	    autoCapitalize: null,
-	    autoCorrect: null,
+	    autoCapitalize: MUST_USE_ATTRIBUTE,
+	    autoCorrect: MUST_USE_ATTRIBUTE,
 	    // autoSave allows WebKit/Blink to persist values of input fields on page reloads
 	    autoSave: null,
 	    // color is for Safari mask-icon link
@@ -18854,9 +18861,7 @@
 	    httpEquiv: 'http-equiv'
 	  },
 	  DOMPropertyNames: {
-	    autoCapitalize: 'autocapitalize',
 	    autoComplete: 'autocomplete',
-	    autoCorrect: 'autocorrect',
 	    autoFocus: 'autofocus',
 	    autoPlay: 'autoplay',
 	    autoSave: 'autosave',
@@ -21510,7 +21515,10 @@
 	      }
 	    });
 	
-	    nativeProps.children = content;
+	    if (content) {
+	      nativeProps.children = content;
+	    }
+	
 	    return nativeProps;
 	  }
 	
@@ -21935,7 +21943,7 @@
 	    var value = LinkedValueUtils.getValue(props);
 	
 	    if (value != null) {
-	      updateOptions(this, props, value);
+	      updateOptions(this, Boolean(props.multiple), value);
 	    }
 	  }
 	}
@@ -24970,11 +24978,14 @@
 	 * @typechecks
 	 */
 	
+	/* eslint-disable fb-www/typeof-undefined */
+	
 	/**
 	 * Same as document.activeElement but wraps in a try-catch block. In IE it is
 	 * not safe to call document.activeElement if there is nothing focused.
 	 *
-	 * The activeElement will be null only if the document or document body is not yet defined.
+	 * The activeElement will be null only if the document or document body is not
+	 * yet defined.
 	 */
 	'use strict';
 	
@@ -24982,7 +24993,6 @@
 	  if (typeof document === 'undefined') {
 	    return null;
 	  }
-	
 	  try {
 	    return document.activeElement || document.body;
 	  } catch (e) {
@@ -26722,7 +26732,9 @@
 	  'setValueForProperty': 'update attribute',
 	  'setValueForAttribute': 'update attribute',
 	  'deleteValueForProperty': 'remove attribute',
-	  'dangerouslyReplaceNodeWithMarkupByID': 'replace'
+	  'setValueForStyles': 'update styles',
+	  'replaceNodeWithMarkup': 'replace',
+	  'updateTextContent': 'set textContent'
 	};
 	
 	function getTotalTime(measurements) {
@@ -26914,18 +26926,23 @@
 	'use strict';
 	
 	var performance = __webpack_require__(230);
-	var curPerformance = performance;
+	
+	var performanceNow;
 	
 	/**
 	 * Detect if we can use `window.performance.now()` and gracefully fallback to
 	 * `Date.now()` if it doesn't exist. We need to support Firefox < 15 for now
 	 * because of Facebook's testing infrastructure.
 	 */
-	if (!curPerformance || !curPerformance.now) {
-	  curPerformance = Date;
+	if (performance.now) {
+	  performanceNow = function () {
+	    return performance.now();
+	  };
+	} else {
+	  performanceNow = function () {
+	    return Date.now();
+	  };
 	}
-	
-	var performanceNow = curPerformance.now.bind(curPerformance);
 	
 	module.exports = performanceNow;
 
@@ -26974,7 +26991,7 @@
 	
 	'use strict';
 	
-	module.exports = '0.14.3';
+	module.exports = '0.14.7';
 
 /***/ },
 /* 232 */
@@ -27953,11 +27970,11 @@
 	
 	'use strict';
 	
-	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-	
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
 	var _react = __webpack_require__(139);
 	
@@ -27975,7 +27992,7 @@
 	
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 	
-	var App = (function (_React$Component) {
+	var App = function (_React$Component) {
 	  _inherits(App, _React$Component);
 	
 	  function App() {
@@ -27997,10 +28014,11 @@
 	  }]);
 	
 	  return App;
-	})(_react2.default.Component);
+	}(_react2.default.Component);
 	
 	exports.default = App;
-	
+	module.exports = exports['default'];
+
 	/* REACT HOT LOADER */ }).call(this); } finally { if (true) { (function () { var foundReactClasses = module.hot.data && module.hot.data.foundReactClasses || false; if (module.exports && module.makeHot) { var makeExportsHot = __webpack_require__(247); if (makeExportsHot(module, __webpack_require__(139))) { foundReactClasses = true; } var shouldAcceptModule = true && foundReactClasses; if (shouldAcceptModule) { module.hot.accept(function (err) { if (err) { console.error("Cannot not apply hot update to " + "App.jsx" + ": " + err.message); } }); } } module.hot.dispose(function (data) { data.makeHot = module.makeHot; data.foundReactClasses = foundReactClasses; }); })(); } }
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
@@ -28012,11 +28030,11 @@
 	
 	'use strict';
 	
-	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-	
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
 	var _react = __webpack_require__(139);
 	
@@ -28042,7 +28060,7 @@
 	
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 	
-	var AudioRecorder = (function (_Component) {
+	var AudioRecorder = function (_Component) {
 	  _inherits(AudioRecorder, _Component);
 	
 	  function AudioRecorder(props) {
@@ -28157,6 +28175,9 @@
 	            console.log(e.data);
 	          };
 	          // start it up
+	
+	          console.log('test!!!!!!');
+	          // console.log()
 	          worker.postMessage({
 	            'buffer': audioBufferToPassToWorker.buffer,
 	            'sampleRate': sampleRate
@@ -28312,7 +28333,7 @@
 	  }]);
 	
 	  return AudioRecorder;
-	})(_react.Component);
+	}(_react.Component);
 	
 	AudioRecorder.propTypes = {
 	  audio: _react.PropTypes.instanceOf(Blob),
@@ -28350,7 +28371,8 @@
 	};
 	
 	exports.default = AudioRecorder;
-	
+	module.exports = exports['default'];
+
 	/* REACT HOT LOADER */ }).call(this); } finally { if (true) { (function () { var foundReactClasses = module.hot.data && module.hot.data.foundReactClasses || false; if (module.exports && module.makeHot) { var makeExportsHot = __webpack_require__(247); if (makeExportsHot(module, __webpack_require__(139))) { foundReactClasses = true; } var shouldAcceptModule = true && foundReactClasses; if (shouldAcceptModule) { module.hot.accept(function (err) { if (err) { console.error("Cannot not apply hot update to " + "AudioRecorder.js" + ": " + err.message); } }); } } module.hot.dispose(function (data) { data.makeHot = module.makeHot; data.foundReactClasses = foundReactClasses; }); })(); } }
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
@@ -28426,6 +28448,7 @@
 	  var audioData = new Blob([view], { type: 'audio/wav' });
 	  return audioData;
 	}
+	module.exports = exports['default'];
 
 	/* REACT HOT LOADER */ }).call(this); } finally { if (true) { (function () { var foundReactClasses = module.hot.data && module.hot.data.foundReactClasses || false; if (module.exports && module.makeHot) { var makeExportsHot = __webpack_require__(247); if (makeExportsHot(module, __webpack_require__(139))) { foundReactClasses = true; } var shouldAcceptModule = true && foundReactClasses; if (shouldAcceptModule) { module.hot.accept(function (err) { if (err) { console.error("Cannot not apply hot update to " + "wav-encoder.js" + ": " + err.message); } }); } } module.hot.dispose(function (data) { data.makeHot = module.makeHot; data.foundReactClasses = foundReactClasses; }); })(); } }
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))

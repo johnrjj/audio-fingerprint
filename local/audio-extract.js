@@ -15,7 +15,7 @@ const binRanges = [
 
 
 // refactor this, it's fugly
-module.exports = function x(computedWindows) {
+module.exports = function(computedWindows) {
   // console.log(computedWindows);
   // console.log(computedWindows.length);
 

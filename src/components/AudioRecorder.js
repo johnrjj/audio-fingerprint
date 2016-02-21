@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import encodeWAV from './wav-encoder.js';
 import styles from './AudioRecorderStyle.scss';
-import MyWorker from 'worker!../worker.js';
+import MyWorker from 'worker!./worker.js';
 
 class AudioRecorder extends Component {
   constructor(props) {
@@ -62,7 +62,7 @@ class AudioRecorder extends Component {
     // this.timer = setTimeout(() => {
     //   console.log('in callback for timeout');
     //   this.stopRecording();
-    // }, 1000); 
+    // }, 1000);
     // clearTimeout(this.timer);
   }
 
@@ -109,12 +109,15 @@ class AudioRecorder extends Component {
           console.log(e.data);
         }
         // start it up
+
+        console.log('test!!!!!!');
+        // console.log()
         worker.postMessage( {
           'buffer': audioBufferToPassToWorker.buffer,
           'sampleRate': sampleRate,
         },
           [audioBufferToPassToWorker.buffer] //xferable object by ref
-        ); 
+        );
 
         const source = this.audioContext.createBufferSource();
         source.buffer = buffer;
@@ -151,7 +154,7 @@ class AudioRecorder extends Component {
   }
 
   removeAudio() {
-    this.buffers = [[], []]; 
+    this.buffers = [[], []];
     this.audioLength = 0;
     if(this.state.audio) {
       if(this.playbackSource) {

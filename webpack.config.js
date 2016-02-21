@@ -1,19 +1,18 @@
-
 var webpack = require('webpack');
 var path = require('path');
 
 module.exports = {
     entry: [
-      //     'babel-polyfill',
+      // 'babel-polyfill',
       'webpack-dev-server/client?http://0.0.0.0:3000', // WebpackDevServer host and port
-      'webpack/hot/only-dev-server', // only hot modules...
-      // 'webpack/hot/dev-server', // here will reload everything
+      // 'webpack/hot/only-dev-server', // only hot modules...
+      'webpack/hot/dev-server', // here will reload everything
       './src/main.jsx' // entry point
     ],
     devtool: process.env.WEBPACK_DEVTOOL || 'source-map',
     output: {
         path: path.join(__dirname, 'public'),
-        publicPath: '/public/',
+        publicPath: '/',
         filename: 'bundle.js'
     },
     resolve: {
@@ -26,14 +25,6 @@ module.exports = {
       }
     },
     module: {
-        // preLoaders: [
-        //   {
-        //       test: /\.jsx?$/,
-        //       exclude: /(node_modules|bower_components)/, 
-        //       // loader: 'jshint-loader!eslint-loader',
-        //       loader: 'eslint-loader',
-        //   }
-        // ],
         loaders: [
             {
                 test: /\.jsx?$/,
@@ -70,11 +61,11 @@ module.exports = {
 //     './src/theme/main.less',
 //     './src/main.jsx',
 //     './local/start',
-//     'webpack-dev-server/client?http://localhost:8080'
+//     'webpack-dev-server/client?http://localhost:8081'
 //   ],
-//   output: { 
-//     path: __dirname + '/dist', 
-//     filename: 'bundle.js' 
+//   output: {
+//     path: __dirname + '/dist',
+//     filename: 'bundle.js'
 //   },
 //   debug: true,
 //   devtool: 'source-map',
@@ -82,12 +73,12 @@ module.exports = {
 //     preLoaders: [
 //       {
 //           test: /\.jsx?$/,
-//           exclude: /node_modules/, 
+//           exclude: /node_modules/,
 //           loader: "jshint-loader"
 //       }
 //     ],
 //     loaders: [
-//       { 
+//       {
 //         test: /\.jsx?$/,
 //         include: path.join(__dirname, 'src'),
 //         loader: 'babel-loader',
@@ -95,13 +86,11 @@ module.exports = {
 //           presets: ['es2015', 'react',  'stage-0']
 //         }
 //       },
-//       { 
+//       {
 //         test: /\.less$/,
 //         loader: "style!css!autoprefixer!less"
 //       },
 //     ]
 //   },
-//   devServer: {
-//     contentBase: "./"
-//   }
+
 // };
