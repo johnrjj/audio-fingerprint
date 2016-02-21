@@ -1,9 +1,12 @@
 // Downsampling using a low-pass filter, linear inteprelation decimation, then hamming window
 'use strict';
 var _ = require('lodash');
+
+
 var windowFilter = require('./audio-window-filter');
+
 var decimator = require('./audio-decimator');
-// var dsp = require('./dsp');
+var dsp = require('./dsp');
 
 module.exports = function(signal, origFrequency, targetFrequency, windowLength) {
   var windowLength = windowLength || signal.length;
@@ -19,9 +22,9 @@ module.exports = function(signal, origFrequency, targetFrequency, windowLength) 
   // Create low-pass filter to get signal ready for downsampling
   // tldr: IIRFilter(filtertype, cutoff frequency, resonance, original frequency)
   let cutoffFrequency = Math.floor(targetFrequency/2);
-  // let filter = new dsp.IIRFilter(dsp.LOWPASS, cutoffFrequency, 1, origFrequency);
-  // // Apply low-pass filter in place
-  // filter.process(signal);
+  let filter = new dsp.IIRFilter(dsp.LOWPASS, cutoffFrequency, 1, origFrequency);
+  // Apply low-pass filter in place
+  filter.process(signal);
 
   //Decimate signal to factor we want
   let decimateFactor = Math.floor(origFrequency / targetFrequency);
