@@ -6,7 +6,8 @@ var _ = require('lodash');
 var windowFilter = require('./audio-window-filter');
 
 var decimator = require('./audio-decimator');
-var dsp = require('./dsp');
+let dsp = require('./dsp');
+// var dsp = new d;
 
 module.exports = function(signal, origFrequency, targetFrequency, windowLength) {
   var windowLength = windowLength || signal.length;
@@ -22,6 +23,7 @@ module.exports = function(signal, origFrequency, targetFrequency, windowLength) 
   // Create low-pass filter to get signal ready for downsampling
   // tldr: IIRFilter(filtertype, cutoff frequency, resonance, original frequency)
   let cutoffFrequency = Math.floor(targetFrequency/2);
+  // console.log(JSON.stringify(dsp));
   let filter = new dsp.IIRFilter(dsp.LOWPASS, cutoffFrequency, 1, origFrequency);
   // Apply low-pass filter in place
   filter.process(signal);

@@ -14,8 +14,6 @@ module.exports = function(signal, sampleRateOfRecording, desiredSamplingRate, si
   // console.log(converted.length);
   // Group audio into windows, then group frequencies into bins per window
   var extracted = audioExtracter(converted);
-// <<<<<<< HEAD
-
   // Apply timeoffsets to all audio data points (right now theyre all in order)
 
   var extractedWithTimeOffsets = audioTimeOffset(extracted, 1024, desiredSamplingRate, 0);

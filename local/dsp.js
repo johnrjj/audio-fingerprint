@@ -76,10 +76,10 @@ var setupTypedArray = function(name, fallback) {
   }
 }
 
-setupTypedArray("Float32Array", "WebGLFloatArray");
-setupTypedArray("Int32Array",   "WebGLIntArray");
-setupTypedArray("Uint16Array",  "WebGLUnsignedShortArray");
-setupTypedArray("Uint8Array",   "WebGLUnsignedByteArray");
+// setupTypedArray("Float32Array", "WebGLFloatArray");
+// setupTypedArray("Int32Array",   "WebGLIntArray");
+// setupTypedArray("Uint16Array",  "WebGLUnsignedShortArray");
+// setupTypedArray("Uint8Array",   "WebGLUnsignedByteArray");
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -2303,19 +2303,21 @@ Reverb.prototype.process = function (interleavedSamples){
 };
 
 /* SEE: https://github.com/umdjs/umd */
-(function (root, factory) {
-    if (typeof define === 'function' && define.amd) {
-        // AMD. Register as an anonymous module.
-        define(factory);
-    } else if (typeof exports === 'object') {
-        // Node. Does not work with strict CommonJS, but
-        // only CommonJS-like enviroments that support module.exports,
-        // like Node.
-        module.exports = factory();
-    } else {
-        // Browser globals (root is window)
-        root.returnExports = factory();
-  }
-}(this, function () {
-  return DSP;
-}));
+// (function (root, factory) {
+//     if (typeof define === 'function' && define.amd) {
+//         // AMD. Register as an anonymous module.
+//         define(factory);
+//     } else if (typeof exports === 'object') {
+//         // Node. Does not work with strict CommonJS, but
+//         // only CommonJS-like enviroments that support module.exports,
+//         // like Node.
+//         module.exports = factory();
+//     } else {
+//         // Browser globals (root is window)
+//         root.returnExports = factory();
+//   }
+// }(this, function () {
+//   return DSP;
+// }));
+
+module.exports = DSP;

@@ -5,13 +5,13 @@ var test = require('../../local/audio-fingerprint');
 onmessage = function(e) {
 	// console.log('here!!!');
 	// throw 'hello';
-	// let floats = new Float32Array(e.data.buffer);
+	let floats = new Float32Array(e.data.buffer);
 	console.log('in worker');
 	// console.log(floats);
 	// console.log(floats);
-	fingerprint();
-	// var res = fingerprint(floats, 44100, 11025);
-	// console.log(res);
-	postMessage('');
+	// fingerprint();
+	var res = test(floats, 44100, 11025);
+	console.log(res);
+	postMessage(res);
 	close();
 }
