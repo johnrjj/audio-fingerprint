@@ -37,6 +37,7 @@ export default function encodeWAV(buffers, bufferLength, sampleRate, volume = 1)
   writeUTFBytes(view, 0, 'RIFF');
   view.setUint32(4, 44 + interleaved.length * 2, true);
   writeUTFBytes(view, 8, 'WAVE');
+
   writeUTFBytes(view, 12, 'fmt ');
   view.setUint32(16, 16, true);
   view.setUint16(20, 1, true);
@@ -48,7 +49,7 @@ export default function encodeWAV(buffers, bufferLength, sampleRate, volume = 1)
 
   writeUTFBytes(view, 36, 'data');
   view.setUint32(40, interleaved.length * 2, true);
-  
+
   interleaved.forEach((sample, index) => {
     view.setInt16(44 + (index * 2), sample * (0x7fff * volume), true);
   });

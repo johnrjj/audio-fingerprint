@@ -16,6 +16,7 @@ function dbInteract(objArray, dbUrl, callback) {
   MongoClient.connect(url, function(err, db) {
     assert.equal(null, err);
     console.log("Connected correctly to server");
+    db.collection('fingerprints').drop();
     var collection = db.collection('fingerprints');
     var bulk = collection.initializeUnorderedBulkOp();
     _.forEach(objArray, obj => {
@@ -30,7 +31,7 @@ function dbInteract(objArray, dbUrl, callback) {
 }
 
 function globAudioFiles(startingDirectory, options, audioFileTypes) {
-  return glob("**/*", options, (er, files) => {
+  return glob("../lib//audio_files/tswift/1989/**/*", options, (er, files) => {
     var filtered = _.filter(files, file => {
       if (~file.indexOf('.mp3')) {
         return true;

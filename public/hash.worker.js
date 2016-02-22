@@ -1,6 +1,6 @@
 /******/ (function(modules) { // webpackBootstrap
 /******/ 	var hotApplyOnUpdate = true;
-/******/ 	var hotCurrentHash = "1a08a683769eb60e984e"; // eslint-disable-line no-unused-vars
+/******/ 	var hotCurrentHash = "ecb9fa9f47fe4ccd507f"; // eslint-disable-line no-unused-vars
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentParents = []; // eslint-disable-line no-unused-vars
 /******/ 	
@@ -514,22 +514,22 @@
 	
 	var _ = __webpack_require__(169);
 	var fingerprint = __webpack_require__(170);
-	var test = __webpack_require__(174);
+	// var test = require('../../lib/audio-fingerprint');
 	onmessage = function onmessage(e) {
 		// console.log('here!!!');
 		// throw 'hello';
-		// let floats = new Float32Array(e.data.buffer);
+		var floats = new Float32Array(e.data.buffer);
 		console.log('in worker');
 		// console.log(floats);
 		// console.log(floats);
-		fingerprint();
-		// var res = fingerprint(floats, 44100, 11025);
-		// console.log(res);
-		postMessage('');
-		close();
+		// fingerprint();
+		var res = fingerprint(floats, 44100, 11025);
+		console.log(res);
+		postMessage(res);
+		// close();
 	};
 	
-	/* REACT HOT LOADER */ }).call(this); } finally { if (true) { (function () { var foundReactClasses = module.hot.data && module.hot.data.foundReactClasses || false; if (module.exports && module.makeHot) { var makeExportsHot = __webpack_require__(171); if (makeExportsHot(module, __webpack_require__(65))) { foundReactClasses = true; } var shouldAcceptModule = true && foundReactClasses; if (shouldAcceptModule) { module.hot.accept(function (err) { if (err) { console.error("Cannot not apply hot update to " + "worker.js" + ": " + err.message); } }); } } module.hot.dispose(function (data) { data.makeHot = module.makeHot; data.foundReactClasses = foundReactClasses; }); })(); } }
+	/* REACT HOT LOADER */ }).call(this); } finally { if (true) { (function () { var foundReactClasses = module.hot.data && module.hot.data.foundReactClasses || false; if (module.exports && module.makeHot) { var makeExportsHot = __webpack_require__(174); if (makeExportsHot(module, __webpack_require__(65))) { foundReactClasses = true; } var shouldAcceptModule = true && foundReactClasses; if (shouldAcceptModule) { module.hot.accept(function (err) { if (err) { console.error("Cannot not apply hot update to " + "worker.js" + ": " + err.message); } }); } } module.hot.dispose(function (data) { data.makeHot = module.makeHot; data.foundReactClasses = foundReactClasses; }); })(); } }
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)(module)))
 
 /***/ },
@@ -32920,21 +32920,159 @@
 	
 	'use strict';
 	
-	module.exports = function () {
-	  console.log('hello!');
+	var _ = __webpack_require__(169);
+	var audioConverter = __webpack_require__(171);
+	var audioExtracter = __webpack_require__(186);
+	var audioTimeOffset = __webpack_require__(188);
+	var targetZoneGenerator = __webpack_require__(189);
+	
+	module.exports = function (signal, sampleRateOfRecording, desiredSamplingRate, signalMetadata) {
+	  //  Downsample signal, then run FFT on it
+	  var converted = audioConverter(signal, sampleRateOfRecording, desiredSamplingRate, 1024);
+	  // Group audio into windows, then group frequencies into bins per window
+	  var extracted = audioExtracter(converted);
+	
+	  // Apply timeoffsets to all audio data points (right now theyre all in order)
+	  var extractedWithTimeOffsets = audioTimeOffset(extracted, 1024, desiredSamplingRate, 0);
+	
+	  // Flatten the list, now that we have the chosen audio points w/ correct time offsets
+	  var flattenedExtractedAudio = _.flatten(extractedWithTimeOffsets);
+	
+	  var targetZones = targetZoneGenerator(flattenedExtractedAudio, 3, 5, signalMetadata);
+	
+	  var targetZonesFlattened = _.flatten(targetZones);
+	  return targetZonesFlattened;
 	};
 	
-	/* REACT HOT LOADER */ }).call(this); } finally { if (true) { (function () { var foundReactClasses = module.hot.data && module.hot.data.foundReactClasses || false; if (module.exports && module.makeHot) { var makeExportsHot = __webpack_require__(171); if (makeExportsHot(module, __webpack_require__(65))) { foundReactClasses = true; } var shouldAcceptModule = true && foundReactClasses; if (shouldAcceptModule) { module.hot.accept(function (err) { if (err) { console.error("Cannot not apply hot update to " + "audio-test.js" + ": " + err.message); } }); } } module.hot.dispose(function (data) { data.makeHot = module.makeHot; data.foundReactClasses = foundReactClasses; }); })(); } }
+	/* REACT HOT LOADER */ }).call(this); } finally { if (true) { (function () { var foundReactClasses = module.hot.data && module.hot.data.foundReactClasses || false; if (module.exports && module.makeHot) { var makeExportsHot = __webpack_require__(174); if (makeExportsHot(module, __webpack_require__(65))) { foundReactClasses = true; } var shouldAcceptModule = true && foundReactClasses; if (shouldAcceptModule) { module.hot.accept(function (err) { if (err) { console.error("Cannot not apply hot update to " + "audio-fingerprint.js" + ": " + err.message); } }); } } module.hot.dispose(function (data) { data.makeHot = module.makeHot; data.foundReactClasses = foundReactClasses; }); })(); } }
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)(module)))
 
 /***/ },
 /* 171 */
 /***/ function(module, exports, __webpack_require__) {
 
+	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(2), RootInstanceProvider = __webpack_require__(10), ReactMount = __webpack_require__(12), React = __webpack_require__(65); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
+	
+	// Driver - takes an audio signal, downsamples, then fast fourier transforms the signal,
+	// and returns the transformed windows in an array.
 	'use strict';
 	
-	var isReactClassish = __webpack_require__(172),
-	    isReactElementish = __webpack_require__(173);
+	var _ = __webpack_require__(169);
+	var downsample = __webpack_require__(172);
+	var fft = __webpack_require__(179);
+	
+	module.exports = function (signal, originalFrequency, targetFrequency, windowSize) {
+	  // Downsample audio to spec
+	  var downsampled = downsample(signal, originalFrequency, targetFrequency, windowSize);
+	  // console.log(downsampled.length);
+	  // Divide the downsampled audio into windows (chunks)
+	  var audioWindows = _.chunk(downsampled, windowSize);
+	  // If incomplete chunk at the end (chunk.length % windowSize != 0), toss it
+	  if (_.last(audioWindows).length < windowSize - 1) {
+	    audioWindows = _.dropRight(audioWindows);
+	  }
+	  // Run FFT on each window
+	  var transformedWindows = _.map(audioWindows, function (audioWindow) {
+	    return fft(audioWindow, windowSize); // oh shit should this be targetFrequency ??!??!?!!?!??
+	  });
+	  return transformedWindows;
+	};
+	
+	/* REACT HOT LOADER */ }).call(this); } finally { if (true) { (function () { var foundReactClasses = module.hot.data && module.hot.data.foundReactClasses || false; if (module.exports && module.makeHot) { var makeExportsHot = __webpack_require__(174); if (makeExportsHot(module, __webpack_require__(65))) { foundReactClasses = true; } var shouldAcceptModule = true && foundReactClasses; if (shouldAcceptModule) { module.hot.accept(function (err) { if (err) { console.error("Cannot not apply hot update to " + "audio-convert.js" + ": " + err.message); } }); } } module.hot.dispose(function (data) { data.makeHot = module.makeHot; data.foundReactClasses = foundReactClasses; }); })(); } }
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)(module)))
+
+/***/ },
+/* 172 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(2), RootInstanceProvider = __webpack_require__(10), ReactMount = __webpack_require__(12), React = __webpack_require__(65); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
+	
+	// Downsampling using a low-pass filter, linear inteprelation decimation, then hamming window
+	'use strict';
+	
+	var _ = __webpack_require__(169);
+	var windowFilter = __webpack_require__(173);
+	var decimator = __webpack_require__(177);
+	var dsp = __webpack_require__(178);
+	
+	module.exports = function (signal, origFrequency, targetFrequency, windowLength) {
+	  var windowLength = windowLength || signal.length;
+	
+	  if (origFrequency < targetFrequency) {
+	    throw 'Target frequency must be smaller than original frequency to downsample';
+	  } else if (origFrequency % targetFrequency != 0) {
+	    throw 'Frequencies must be divisible by an integer factor.';
+	  } else if (origFrequency == targetFrequency) {
+	    throw 'Implement optimization for same freqs';
+	  }
+	
+	  // Create low-pass filter to get signal ready for downsampling
+	  // tldr: IIRFilter(filtertype, cutoff frequency, resonance, original frequency)
+	  var cutoffFrequency = Math.floor(targetFrequency / 2);
+	
+	  var filter = new dsp.IIRFilter(dsp.LOWPASS, cutoffFrequency, 1, origFrequency);
+	  // Apply low-pass filter in place
+	  filter.process(signal);
+	
+	  //Decimate signal to factor we want
+	  var decimateFactor = Math.floor(origFrequency / targetFrequency);
+	  var decimatedSignal = decimator(signal, decimateFactor);
+	
+	  // Applying hamming window to prevent spectrum leakage, in place
+	  var chunksToWindowFilter = _.chunk(decimatedSignal, windowLength);
+	  _.forEach(chunksToWindowFilter, function (chunk) {
+	    windowFilter.applyWindowFilter('HAMMING', chunk);
+	  });
+	
+	  // Merge chunks to assemble full downsampled audio file.
+	  return _.flatten(chunksToWindowFilter);
+	};
+	
+	/* REACT HOT LOADER */ }).call(this); } finally { if (true) { (function () { var foundReactClasses = module.hot.data && module.hot.data.foundReactClasses || false; if (module.exports && module.makeHot) { var makeExportsHot = __webpack_require__(174); if (makeExportsHot(module, __webpack_require__(65))) { foundReactClasses = true; } var shouldAcceptModule = true && foundReactClasses; if (shouldAcceptModule) { module.hot.accept(function (err) { if (err) { console.error("Cannot not apply hot update to " + "audio-downsampler.js" + ": " + err.message); } }); } } module.hot.dispose(function (data) { data.makeHot = module.makeHot; data.foundReactClasses = foundReactClasses; }); })(); } }
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)(module)))
+
+/***/ },
+/* 173 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(2), RootInstanceProvider = __webpack_require__(10), ReactMount = __webpack_require__(12), React = __webpack_require__(65); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
+	
+	// Takes a signal window and applies (currently only) a hamming window filter
+	'use strict';
+	
+	var _ = __webpack_require__(169);
+	
+	module.exports = {
+	  computeWindowFilterCoefForIndex: function computeWindowFilterCoefForIndex(windowLength, index) {
+	    if (windowLength == 1) {
+	      return 1;
+	    }
+	    return 0.54 - 0.46 * Math.cos(2 * Math.PI * index / (windowLength - 1));
+	  },
+	  applyWindowFilter: function applyWindowFilter(filterType, source) {
+	    var _this = this;
+	
+	    switch (filterType) {
+	      default:
+	        var windowLength = source.length;
+	        _.forEach(source, function (element, index) {
+	          element *= _this.computeWindowFilterCoefForIndex(windowLength, index);
+	        });
+	    }
+	  }
+	};
+	
+	/* REACT HOT LOADER */ }).call(this); } finally { if (true) { (function () { var foundReactClasses = module.hot.data && module.hot.data.foundReactClasses || false; if (module.exports && module.makeHot) { var makeExportsHot = __webpack_require__(174); if (makeExportsHot(module, __webpack_require__(65))) { foundReactClasses = true; } var shouldAcceptModule = true && foundReactClasses; if (shouldAcceptModule) { module.hot.accept(function (err) { if (err) { console.error("Cannot not apply hot update to " + "audio-window-filter.js" + ": " + err.message); } }); } } module.hot.dispose(function (data) { data.makeHot = module.makeHot; data.foundReactClasses = foundReactClasses; }); })(); } }
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)(module)))
+
+/***/ },
+/* 174 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var isReactClassish = __webpack_require__(175),
+	    isReactElementish = __webpack_require__(176);
 	
 	function makeExportsHot(m, React) {
 	  if (isReactElementish(m.exports, React)) {
@@ -32988,7 +33126,7 @@
 
 
 /***/ },
-/* 172 */
+/* 175 */
 /***/ function(module, exports) {
 
 	function hasRender(Class) {
@@ -33038,10 +33176,10 @@
 	module.exports = isReactClassish;
 
 /***/ },
-/* 173 */
+/* 176 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var isReactClassish = __webpack_require__(172);
+	var isReactClassish = __webpack_require__(175);
 	
 	function isReactElementish(obj, React) {
 	  if (!obj) {
@@ -33053,128 +33191,6 @@
 	}
 	
 	module.exports = isReactElementish;
-
-/***/ },
-/* 174 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(2), RootInstanceProvider = __webpack_require__(10), ReactMount = __webpack_require__(12), React = __webpack_require__(65); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
-	
-	'use strict';
-	
-	var _ = __webpack_require__(169);
-	var downsample = __webpack_require__(175);
-	// var audioConverter = require('./audio-convert');
-	// var audioExtracter = require('./audio-extract');
-	var audioTimeOffset = __webpack_require__(179);
-	var targetZoneGenerator = __webpack_require__(180);
-	var math = __webpack_require__(181);
-	
-	module.exports = function (signal, sampleRateOfRecording, desiredSamplingRate, signalMetadata) {
-	  console.log('wtf');
-	  //  Downsample signal, then run FFT on it
-	  // var converted = audioConverter(signal, sampleRateOfRecording, desiredSamplingRate, 1024)
-	  // console.log(converted.length);
-	  // Group audio into windows, then group frequencies into bins per window
-	  // var extracted = audioExtracter(converted);
-	
-	  // Apply timeoffsets to all audio data points (right now theyre all in order)
-	  var extractedWithTimeOffsets = audioTimeOffset(extracted, 1024, desiredSamplingRate, 0);
-	
-	  // Flatten the list, now that we have the chosen audio points w/ correct time offsets
-	  var flattenedExtractedAudio = _.flatten(extractedWithTimeOffsets);
-	
-	  var targetZones = targetZoneGenerator(flattenedExtractedAudio, 3, 5, signalMetadata);
-	
-	  var targetZonesFlattened = _.flatten(targetZones);
-	  return targetZonesFlattened;
-	};
-	
-	/* REACT HOT LOADER */ }).call(this); } finally { if (true) { (function () { var foundReactClasses = module.hot.data && module.hot.data.foundReactClasses || false; if (module.exports && module.makeHot) { var makeExportsHot = __webpack_require__(171); if (makeExportsHot(module, __webpack_require__(65))) { foundReactClasses = true; } var shouldAcceptModule = true && foundReactClasses; if (shouldAcceptModule) { module.hot.accept(function (err) { if (err) { console.error("Cannot not apply hot update to " + "audio-fingerprint.js" + ": " + err.message); } }); } } module.hot.dispose(function (data) { data.makeHot = module.makeHot; data.foundReactClasses = foundReactClasses; }); })(); } }
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)(module)))
-
-/***/ },
-/* 175 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(2), RootInstanceProvider = __webpack_require__(10), ReactMount = __webpack_require__(12), React = __webpack_require__(65); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
-	
-	// Downsampling using a low-pass filter, linear inteprelation decimation, then hamming window
-	'use strict';
-	
-	var _ = __webpack_require__(169);
-	var windowFilter = __webpack_require__(176);
-	var decimator = __webpack_require__(177);
-	var dsp = __webpack_require__(178);
-	
-	module.exports = function (signal, origFrequency, targetFrequency, windowLength) {
-	  var windowLength = windowLength || signal.length;
-	
-	  if (origFrequency < targetFrequency) {
-	    throw 'Target frequency must be smaller than original frequency to downsample';
-	  } else if (origFrequency % targetFrequency != 0) {
-	    throw 'Frequencies must be divisible by an integer factor.';
-	  } else if (origFrequency == targetFrequency) {
-	    throw 'Implement optimization for same freqs';
-	  }
-	
-	  // Create low-pass filter to get signal ready for downsampling
-	  // tldr: IIRFilter(filtertype, cutoff frequency, resonance, original frequency)
-	  var cutoffFrequency = Math.floor(targetFrequency / 2);
-	  var filter = new dsp.IIRFilter(dsp.LOWPASS, cutoffFrequency, 1, origFrequency);
-	  // Apply low-pass filter in place
-	  filter.process(signal);
-	
-	  //Decimate signal to factor we want
-	  var decimateFactor = Math.floor(origFrequency / targetFrequency);
-	  var decimatedSignal = decimator(signal, decimateFactor);
-	
-	  // Applying hamming window to prevent spectrum leakage, in place
-	  var chunksToWindowFilter = _.chunk(decimatedSignal, windowLength);
-	  _.forEach(chunksToWindowFilter, function (chunk) {
-	    windowFilter.applyWindowFilter('HAMMING', chunk);
-	  });
-	
-	  // Merge chunks to assemble full downsampled audio file.
-	  return _.flatten(chunksToWindowFilter);
-	};
-	
-	/* REACT HOT LOADER */ }).call(this); } finally { if (true) { (function () { var foundReactClasses = module.hot.data && module.hot.data.foundReactClasses || false; if (module.exports && module.makeHot) { var makeExportsHot = __webpack_require__(171); if (makeExportsHot(module, __webpack_require__(65))) { foundReactClasses = true; } var shouldAcceptModule = true && foundReactClasses; if (shouldAcceptModule) { module.hot.accept(function (err) { if (err) { console.error("Cannot not apply hot update to " + "audio-downsampler.js" + ": " + err.message); } }); } } module.hot.dispose(function (data) { data.makeHot = module.makeHot; data.foundReactClasses = foundReactClasses; }); })(); } }
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)(module)))
-
-/***/ },
-/* 176 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(2), RootInstanceProvider = __webpack_require__(10), ReactMount = __webpack_require__(12), React = __webpack_require__(65); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
-	
-	// Takes a signal window and applies (currently only) a hamming window filter
-	'use strict';
-	
-	var _ = __webpack_require__(169);
-	
-	module.exports = {
-	  computeWindowFilterCoefForIndex: function computeWindowFilterCoefForIndex(windowLength, index) {
-	    if (windowLength == 1) {
-	      return 1;
-	    }
-	    return 0.54 - 0.46 * Math.cos(2 * Math.PI * index / (windowLength - 1));
-	  },
-	  applyWindowFilter: function applyWindowFilter(filterType, source) {
-	    var _this = this;
-	
-	    switch (filterType) {
-	      default:
-	        var windowLength = source.length;
-	        _.forEach(source, function (element, index) {
-	          element *= _this.computeWindowFilterCoefForIndex(windowLength, index);
-	        });
-	    }
-	  }
-	};
-	
-	/* REACT HOT LOADER */ }).call(this); } finally { if (true) { (function () { var foundReactClasses = module.hot.data && module.hot.data.foundReactClasses || false; if (module.exports && module.makeHot) { var makeExportsHot = __webpack_require__(171); if (makeExportsHot(module, __webpack_require__(65))) { foundReactClasses = true; } var shouldAcceptModule = true && foundReactClasses; if (shouldAcceptModule) { module.hot.accept(function (err) { if (err) { console.error("Cannot not apply hot update to " + "audio-window-filter.js" + ": " + err.message); } }); } } module.hot.dispose(function (data) { data.makeHot = module.makeHot; data.foundReactClasses = foundReactClasses; }); })(); } }
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)(module)))
 
 /***/ },
 /* 177 */
@@ -33193,14 +33209,14 @@
 	  });
 	};
 	
-	/* REACT HOT LOADER */ }).call(this); } finally { if (true) { (function () { var foundReactClasses = module.hot.data && module.hot.data.foundReactClasses || false; if (module.exports && module.makeHot) { var makeExportsHot = __webpack_require__(171); if (makeExportsHot(module, __webpack_require__(65))) { foundReactClasses = true; } var shouldAcceptModule = true && foundReactClasses; if (shouldAcceptModule) { module.hot.accept(function (err) { if (err) { console.error("Cannot not apply hot update to " + "audio-decimator.js" + ": " + err.message); } }); } } module.hot.dispose(function (data) { data.makeHot = module.makeHot; data.foundReactClasses = foundReactClasses; }); })(); } }
+	/* REACT HOT LOADER */ }).call(this); } finally { if (true) { (function () { var foundReactClasses = module.hot.data && module.hot.data.foundReactClasses || false; if (module.exports && module.makeHot) { var makeExportsHot = __webpack_require__(174); if (makeExportsHot(module, __webpack_require__(65))) { foundReactClasses = true; } var shouldAcceptModule = true && foundReactClasses; if (shouldAcceptModule) { module.hot.accept(function (err) { if (err) { console.error("Cannot not apply hot update to " + "audio-decimator.js" + ": " + err.message); } }); } } module.hot.dispose(function (data) { data.makeHot = module.makeHot; data.foundReactClasses = foundReactClasses; }); })(); } }
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)(module)))
 
 /***/ },
 /* 178 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(2), RootInstanceProvider = __webpack_require__(10), ReactMount = __webpack_require__(12), React = __webpack_require__(65); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
+	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(2), RootInstanceProvider = __webpack_require__(10), ReactMount = __webpack_require__(12), React = __webpack_require__(65); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
 	
 	"use strict";
 	
@@ -33284,10 +33300,10 @@
 	  }
 	};
 	
-	setupTypedArray("Float32Array", "WebGLFloatArray");
-	setupTypedArray("Int32Array", "WebGLIntArray");
-	setupTypedArray("Uint16Array", "WebGLUnsignedShortArray");
-	setupTypedArray("Uint8Array", "WebGLUnsignedByteArray");
+	// setupTypedArray("Float32Array", "WebGLFloatArray");
+	// setupTypedArray("Int32Array",   "WebGLIntArray");
+	// setupTypedArray("Uint16Array",  "WebGLUnsignedShortArray");
+	// setupTypedArray("Uint8Array",   "WebGLUnsignedByteArray");
 	
 	////////////////////////////////////////////////////////////////////////////////
 	//                            DSP UTILITY FUNCTIONS                           //
@@ -35535,24 +35551,26 @@
 	};
 	
 	/* SEE: https://github.com/umdjs/umd */
-	(function (root, factory) {
-	  if (true) {
-	    // AMD. Register as an anonymous module.
-	    !(__WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.call(exports, __webpack_require__, exports, module)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
-	  } else if ((typeof exports === "undefined" ? "undefined" : _typeof(exports)) === 'object') {
-	    // Node. Does not work with strict CommonJS, but
-	    // only CommonJS-like enviroments that support module.exports,
-	    // like Node.
-	    module.exports = factory();
-	  } else {
-	    // Browser globals (root is window)
-	    root.returnExports = factory();
-	  }
-	})(undefined, function () {
-	  return DSP;
-	});
+	// (function (root, factory) {
+	//     if (typeof define === 'function' && define.amd) {
+	//         // AMD. Register as an anonymous module.
+	//         define(factory);
+	//     } else if (typeof exports === 'object') {
+	//         // Node. Does not work with strict CommonJS, but
+	//         // only CommonJS-like enviroments that support module.exports,
+	//         // like Node.
+	//         module.exports = factory();
+	//     } else {
+	//         // Browser globals (root is window)
+	//         root.returnExports = factory();
+	//   }
+	// }(this, function () {
+	//   return DSP;
+	// }));
 	
-	/* REACT HOT LOADER */ }).call(this); } finally { if (true) { (function () { var foundReactClasses = module.hot.data && module.hot.data.foundReactClasses || false; if (module.exports && module.makeHot) { var makeExportsHot = __webpack_require__(171); if (makeExportsHot(module, __webpack_require__(65))) { foundReactClasses = true; } var shouldAcceptModule = true && foundReactClasses; if (shouldAcceptModule) { module.hot.accept(function (err) { if (err) { console.error("Cannot not apply hot update to " + "dsp.js" + ": " + err.message); } }); } } module.hot.dispose(function (data) { data.makeHot = module.makeHot; data.foundReactClasses = foundReactClasses; }); })(); } }
+	module.exports = DSP;
+	
+	/* REACT HOT LOADER */ }).call(this); } finally { if (true) { (function () { var foundReactClasses = module.hot.data && module.hot.data.foundReactClasses || false; if (module.exports && module.makeHot) { var makeExportsHot = __webpack_require__(174); if (makeExportsHot(module, __webpack_require__(65))) { foundReactClasses = true; } var shouldAcceptModule = true && foundReactClasses; if (shouldAcceptModule) { module.hot.accept(function (err) { if (err) { console.error("Cannot not apply hot update to " + "dsp.js" + ": " + err.message); } }); } } module.hot.dispose(function (data) { data.makeHot = module.makeHot; data.foundReactClasses = foundReactClasses; }); })(); } }
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)(module)))
 
 /***/ },
@@ -35561,104 +35579,668 @@
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(2), RootInstanceProvider = __webpack_require__(10), ReactMount = __webpack_require__(12), React = __webpack_require__(65); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
 	
+	// Does a FFT based off the sample rate and signal
+	/*eslint-disable */
 	'use strict';
 	
-	var _ = __webpack_require__(169);
-	//example: x(array, 1024, 11025, 0)
-	//probably a prettier way to do this
+	var fft = __webpack_require__(180).fft;
+	var fftUtil = __webpack_require__(180).util;
 	
-	// Takes an array of audiosample windows and applies a timeoffset to the audioArray
-	// based on the window size, sample rate, and provided time offset
-	module.exports = function (audioWindows, audioWindowSize, sampleRate, timeOffset) {
-	  // For each window...
-	  return _.map(audioWindows, function (audioWindow, index) {
-	    // console.log(index);
-	    // Calc cur time for window
-	    var time = index * audioWindowSize / sampleRate + timeOffset;
-	    // Apply time to each point in window. (immutable tho, hence clone)
-	    return _.map(audioWindow, function (audioPointInWindow) {
-	      var temp = {};
-	      temp = _.cloneDeep(audioPointInWindow);
-	      temp.time = time;
-	      return temp;
-	    });
+	module.exports = function (signal, sampleRate) {
+	  var phasors = fft(signal);
+	  var frequencies = fftUtil.fftFreq(phasors, sampleRate),
+	      magnitudes = fftUtil.fftMag(phasors);
+	  var frequencyAndMagnitudeArray = frequencies.map(function (f, ix) {
+	    return {
+	      frequency: f,
+	      magnitude: magnitudes[ix]
+	    };
 	  });
+	  return frequencyAndMagnitudeArray;
 	};
 	
-	/* REACT HOT LOADER */ }).call(this); } finally { if (true) { (function () { var foundReactClasses = module.hot.data && module.hot.data.foundReactClasses || false; if (module.exports && module.makeHot) { var makeExportsHot = __webpack_require__(171); if (makeExportsHot(module, __webpack_require__(65))) { foundReactClasses = true; } var shouldAcceptModule = true && foundReactClasses; if (shouldAcceptModule) { module.hot.accept(function (err) { if (err) { console.error("Cannot not apply hot update to " + "audio-timeoffset.js" + ": " + err.message); } }); } } module.hot.dispose(function (data) { data.makeHot = module.makeHot; data.foundReactClasses = foundReactClasses; }); })(); } }
+	/* REACT HOT LOADER */ }).call(this); } finally { if (true) { (function () { var foundReactClasses = module.hot.data && module.hot.data.foundReactClasses || false; if (module.exports && module.makeHot) { var makeExportsHot = __webpack_require__(174); if (makeExportsHot(module, __webpack_require__(65))) { foundReactClasses = true; } var shouldAcceptModule = true && foundReactClasses; if (shouldAcceptModule) { module.hot.accept(function (err) { if (err) { console.error("Cannot not apply hot update to " + "audio-fft.js" + ": " + err.message); } }); } } module.hot.dispose(function (data) { data.makeHot = module.makeHot; data.foundReactClasses = foundReactClasses; }); })(); } }
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)(module)))
 
 /***/ },
 /* 180 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(2), RootInstanceProvider = __webpack_require__(10), ReactMount = __webpack_require__(12), React = __webpack_require__(65); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
-	
-	'use strict';
-	
-	var _ = __webpack_require__(169);
-	
-	function pad(num, size) {
-	  var s = num + "";
-	  while (s.length < size) {
-	    s = "0" + s;
-	  }return s;
-	}
-	
-	module.exports = function (audioArray, anchorOffset, zoneSize, songMetadata) {
-	  // console.log(audioArray);
-	  // console.log(anchorOffset);
-	  // console.log(zoneSize);
-	
-	  var allZonesAddresses = _.map(audioArray, function (element, index) {
-	    var anchor = index;
-	    var startingIndexOfZone = anchor + anchorOffset;
-	    var absTimeOfAnchor = audioArray[index].time; // todo add delta time offset to function
-	
-	    var zoneAddresses = [];
-	
-	    if (audioArray.length < startingIndexOfZone + zoneSize) return [];
-	
-	    for (var i = startingIndexOfZone; i < startingIndexOfZone + zoneSize; i++) {
-	      var addressArr = [];
-	      //[“frequency of the  anchor”;” frequency of the  point”;”delta time between the anchor and the point”].
-	      // addressArr.push(audioArray[anchor].frequency);
-	      // addressArr.push(audioArray[i].frequency);
-	      var deltaTime = Math.abs(audioArray[i].time - audioArray[anchor].time);
-	      // addressArr.push(deltaTime);
-	      // // console.log(addressArr);
-	      // zoneAddresses.push(addressArr);
-	
-	      var anchorFreq = audioArray[anchor].frequency;
-	      var pointFreq = audioArray[i].frequency;
-	      var encodedAddress = pad(anchorFreq, 3) + pad(pointFreq, 3) + pad(Math.floor(deltaTime * 1000), 6);
-	
-	      var address = {
-	        anchorFreq: anchorFreq,
-	        pointFreq: pointFreq,
-	        timeDelta: deltaTime,
-	        encodedAddress: encodedAddress,
-	        absTimeOfAnchor: absTimeOfAnchor,
-	        songMetadata: songMetadata
-	      };
-	      zoneAddresses.push(address);
-	    };
-	    return zoneAddresses;
-	  });
-	  // console.log(allZonesAddresses);
-	  return allZonesAddresses;
+	/*===========================================================================*\
+	 * Fast Fourier Transform (Cooley-Tukey Method)
+	 *
+	 * (c) Vail Systems. Joshua Jung and Ben Bryan. 2015
+	 *
+	 * This code is not designed to be highly optimized but as an educational
+	 * tool to understand the Fast Fourier Transform.
+	\*===========================================================================*/
+	module.exports = {
+	    fft: __webpack_require__(181).fft,
+	    fftInPlace: __webpack_require__(181).fftInPlace,
+	    util: __webpack_require__(183),
+	    dft: __webpack_require__(185)
 	};
-	
-	//     //[“absolute time of the anchor in the song”;”Id of the song”].
-	//     let addressLink = [];
-	//     addressLink.push(arr[anchor].time);
-	//     addressLink.push(songId);
 
-	/* REACT HOT LOADER */ }).call(this); } finally { if (true) { (function () { var foundReactClasses = module.hot.data && module.hot.data.foundReactClasses || false; if (module.exports && module.makeHot) { var makeExportsHot = __webpack_require__(171); if (makeExportsHot(module, __webpack_require__(65))) { foundReactClasses = true; } var shouldAcceptModule = true && foundReactClasses; if (shouldAcceptModule) { module.hot.accept(function (err) { if (err) { console.error("Cannot not apply hot update to " + "generate-target-zone.js" + ": " + err.message); } }); } } module.hot.dispose(function (data) { data.makeHot = module.makeHot; data.foundReactClasses = foundReactClasses; }); })(); } }
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)(module)))
 
 /***/ },
 /* 181 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/*===========================================================================*\
+	 * Fast Fourier Transform (Cooley-Tukey Method)
+	 *
+	 * (c) Vail Systems. Joshua Jung and Ben Bryan. 2015
+	 *
+	 * This code is not designed to be highly optimized but as an educational
+	 * tool to understand the Fast Fourier Transform.
+	\*===========================================================================*/
+	
+	//------------------------------------------------
+	// Note: Some of this code is not optimized and is
+	// primarily designed as an educational and testing
+	// tool.
+	// To get high performace would require transforming
+	// the recursive calls into a loop and then loop
+	// unrolling. All of this is best accomplished
+	// in C or assembly.
+	//-------------------------------------------------
+	
+	//-------------------------------------------------
+	// The following code assumes a complex number is
+	// an array: [real, imaginary]
+	//-------------------------------------------------
+	var complex = __webpack_require__(182),
+	    fftUtil = __webpack_require__(183),
+	    twiddle = __webpack_require__(184);
+	
+	module.exports = {
+	  //-------------------------------------------------
+	  // Calculate FFT for vector where vector.length
+	  // is assumed to be a power of 2.
+	  //-------------------------------------------------
+	  fft: function fft(vector) {
+	    var X = [],
+	        N = vector.length;
+	
+	    // Base case is X = x + 0i since our input is assumed to be real only.
+	    if (N == 1) {
+	      return [[vector[0], 0]];
+	    }
+	
+	    // Recurse: all even samples
+	    var X_evens = fft(vector.filter(even)),
+	
+	        // Recurse: all odd samples
+	        X_odds  = fft(vector.filter(odd));
+	
+	    // Now, perform N/2 operations!
+	    for (var k = 0; k < N / 2; k++) {
+	      // t is a complex number!
+	      var t = X_evens[k],
+	          e = complex.multiply(fftUtil.exponent(k, N), X_odds[k]);
+	
+	      X[k] = complex.add(t, e);
+	      X[k + (N / 2)] = complex.subtract(t, e);
+	    }
+	
+	    function even(__, ix) {
+	      return ix % 2 == 0;
+	    }
+	
+	    function odd(__, ix) {
+	      return ix % 2 == 1;
+	    }
+	
+	    return X;
+	  },
+	  //-------------------------------------------------
+	  // Calculate FFT for vector where vector.length
+	  // is assumed to be a power of 2.  This is the in-
+	  // place implementation, to avoid the memory
+	  // footprint used by recursion.
+	  //-------------------------------------------------
+	  fftInPlace: function(vector) {
+	    var N = vector.length;
+	
+	    var trailingZeros = twiddle.countTrailingZeros(N); //Once reversed, this will be leading zeros
+	
+	    // Reverse bits
+	    for (var k = 0; k < N; k++) {
+	      var p = twiddle.reverse(k) >>> (twiddle.INT_BITS - trailingZeros);
+	      if (p > k) {
+	        var complexTemp = [vector[k], 0];
+	        vector[k] = vector[p];
+	        vector[p] = complexTemp;
+	      } else {
+	        vector[p] = [vector[p], 0];
+	      }
+	    }
+	
+	    //Do the DIT now in-place
+	    for (var len = 2; len <= N; len += len) {
+	      for (var i = 0; i < len / 2; i++) {
+	        var w = fftUtil.exponent(i, len);
+	        for (var j = 0; j < N / len; j++) {
+	          var t = complex.multiply(w, vector[j * len + i + len / 2]);
+	          vector[j * len + i + len / 2] = complex.subtract(vector[j * len + i], t);
+	          vector[j * len + i] = complex.add(vector[j * len + i], t);
+	        }
+	      }
+	    }
+	  }
+	};
+
+
+/***/ },
+/* 182 */
+/***/ function(module, exports) {
+
+	//-------------------------------------------------
+	// Add two complex numbers
+	//-------------------------------------------------
+	var complexAdd = function (a, b)
+	{
+	    return [a[0] + b[0], a[1] + b[1]];
+	};
+	
+	//-------------------------------------------------
+	// Subtract two complex numbers
+	//-------------------------------------------------
+	var complexSubtract = function (a, b)
+	{
+	    return [a[0] - b[0], a[1] - b[1]];
+	};
+	
+	//-------------------------------------------------
+	// Multiply two complex numbers
+	//
+	// (a + bi) * (c + di) = (ac - bd) + (ad + bc)i
+	//-------------------------------------------------
+	var complexMultiply = function (a, b) 
+	{
+	    return [(a[0] * b[0] - a[1] * b[1]), 
+	            (a[0] * b[1] + a[1] * b[0])];
+	};
+	
+	//-------------------------------------------------
+	// Calculate |a + bi|
+	//
+	// sqrt(a*a + b*b)
+	//-------------------------------------------------
+	var complexMagnitude = function (c) 
+	{
+	    return Math.sqrt(c[0]*c[0] + c[1]*c[1]); 
+	};
+	
+	//-------------------------------------------------
+	// Exports
+	//-------------------------------------------------
+	module.exports = {
+	    add: complexAdd,
+	    subtract: complexSubtract,
+	    multiply: complexMultiply,
+	    magnitude: complexMagnitude
+	};
+
+
+/***/ },
+/* 183 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/*===========================================================================*\
+	 * Fast Fourier Transform Frequency/Magnitude passes
+	 *
+	 * (c) Vail Systems. Joshua Jung and Ben Bryan. 2015
+	 *
+	 * This code is not designed to be highly optimized but as an educational
+	 * tool to understand the Fast Fourier Transform.
+	\*===========================================================================*/
+	
+	//-------------------------------------------------
+	// The following code assumes a complex number is
+	// an array: [real, imaginary]
+	//-------------------------------------------------
+	var complex = __webpack_require__(182);
+	
+	
+	//-------------------------------------------------
+	// By Eulers Formula:
+	//
+	// e^(i*x) = cos(x) + i*sin(x)
+	//
+	// and in DFT:
+	//
+	// x = -2*PI*(k/N)
+	//-------------------------------------------------
+	var mapExponent = {},
+	    exponent = function (k, N) {
+	      var x = -2 * Math.PI * (k / N);
+	
+	      mapExponent[N] = mapExponent[N] || {};
+	      mapExponent[N][k] = mapExponent[N][k] || [Math.cos(x), Math.sin(x)];// [Real, Imaginary]
+	
+	      return mapExponent[N][k];
+	};
+	
+	//-------------------------------------------------
+	// Calculate FFT Magnitude for complex numbers.
+	//-------------------------------------------------
+	var fftMag = function (fftBins) {
+	    var ret = fftBins.map(complex.magnitude);
+	    return ret.slice(0, ret.length / 2);
+	};
+	
+	//-------------------------------------------------
+	// Calculate Frequency Bins
+	// 
+	// Returns an array of the frequencies (in hertz) of
+	// each FFT bin provided, assuming the sampleRate is
+	// samples taken per second.
+	//-------------------------------------------------
+	var fftFreq = function (fftBins, sampleRate) {
+	    var stepFreq = sampleRate / (fftBins.length);
+	    var ret = fftBins.slice(0, fftBins.length / 2);
+	
+	    return ret.map(function (__, ix) {
+	        return ix * stepFreq;
+	    });
+	};
+	
+	//-------------------------------------------------
+	// Exports
+	//-------------------------------------------------
+	module.exports = {
+	    fftMag: fftMag,
+	    fftFreq: fftFreq,
+	    exponent: exponent
+	};
+
+
+/***/ },
+/* 184 */
+/***/ function(module, exports) {
+
+	/**
+	 * Bit twiddling hacks for JavaScript.
+	 *
+	 * Author: Mikola Lysenko
+	 *
+	 * Ported from Stanford bit twiddling hack library:
+	 *    http://graphics.stanford.edu/~seander/bithacks.html
+	 */
+	
+	"use strict"; "use restrict";
+	
+	//Number of bits in an integer
+	var INT_BITS = 32;
+	
+	//Constants
+	exports.INT_BITS  = INT_BITS;
+	exports.INT_MAX   =  0x7fffffff;
+	exports.INT_MIN   = -1<<(INT_BITS-1);
+	
+	//Returns -1, 0, +1 depending on sign of x
+	exports.sign = function(v) {
+	  return (v > 0) - (v < 0);
+	}
+	
+	//Computes absolute value of integer
+	exports.abs = function(v) {
+	  var mask = v >> (INT_BITS-1);
+	  return (v ^ mask) - mask;
+	}
+	
+	//Computes minimum of integers x and y
+	exports.min = function(x, y) {
+	  return y ^ ((x ^ y) & -(x < y));
+	}
+	
+	//Computes maximum of integers x and y
+	exports.max = function(x, y) {
+	  return x ^ ((x ^ y) & -(x < y));
+	}
+	
+	//Checks if a number is a power of two
+	exports.isPow2 = function(v) {
+	  return !(v & (v-1)) && (!!v);
+	}
+	
+	//Computes log base 2 of v
+	exports.log2 = function(v) {
+	  var r, shift;
+	  r =     (v > 0xFFFF) << 4; v >>>= r;
+	  shift = (v > 0xFF  ) << 3; v >>>= shift; r |= shift;
+	  shift = (v > 0xF   ) << 2; v >>>= shift; r |= shift;
+	  shift = (v > 0x3   ) << 1; v >>>= shift; r |= shift;
+	  return r | (v >> 1);
+	}
+	
+	//Computes log base 10 of v
+	exports.log10 = function(v) {
+	  return  (v >= 1000000000) ? 9 : (v >= 100000000) ? 8 : (v >= 10000000) ? 7 :
+	          (v >= 1000000) ? 6 : (v >= 100000) ? 5 : (v >= 10000) ? 4 :
+	          (v >= 1000) ? 3 : (v >= 100) ? 2 : (v >= 10) ? 1 : 0;
+	}
+	
+	//Counts number of bits
+	exports.popCount = function(v) {
+	  v = v - ((v >>> 1) & 0x55555555);
+	  v = (v & 0x33333333) + ((v >>> 2) & 0x33333333);
+	  return ((v + (v >>> 4) & 0xF0F0F0F) * 0x1010101) >>> 24;
+	}
+	
+	//Counts number of trailing zeros
+	function countTrailingZeros(v) {
+	  var c = 32;
+	  v &= -v;
+	  if (v) c--;
+	  if (v & 0x0000FFFF) c -= 16;
+	  if (v & 0x00FF00FF) c -= 8;
+	  if (v & 0x0F0F0F0F) c -= 4;
+	  if (v & 0x33333333) c -= 2;
+	  if (v & 0x55555555) c -= 1;
+	  return c;
+	}
+	exports.countTrailingZeros = countTrailingZeros;
+	
+	//Rounds to next power of 2
+	exports.nextPow2 = function(v) {
+	  v += v === 0;
+	  --v;
+	  v |= v >>> 1;
+	  v |= v >>> 2;
+	  v |= v >>> 4;
+	  v |= v >>> 8;
+	  v |= v >>> 16;
+	  return v + 1;
+	}
+	
+	//Rounds down to previous power of 2
+	exports.prevPow2 = function(v) {
+	  v |= v >>> 1;
+	  v |= v >>> 2;
+	  v |= v >>> 4;
+	  v |= v >>> 8;
+	  v |= v >>> 16;
+	  return v - (v>>>1);
+	}
+	
+	//Computes parity of word
+	exports.parity = function(v) {
+	  v ^= v >>> 16;
+	  v ^= v >>> 8;
+	  v ^= v >>> 4;
+	  v &= 0xf;
+	  return (0x6996 >>> v) & 1;
+	}
+	
+	var REVERSE_TABLE = new Array(256);
+	
+	(function(tab) {
+	  for(var i=0; i<256; ++i) {
+	    var v = i, r = i, s = 7;
+	    for (v >>>= 1; v; v >>>= 1) {
+	      r <<= 1;
+	      r |= v & 1;
+	      --s;
+	    }
+	    tab[i] = (r << s) & 0xff;
+	  }
+	})(REVERSE_TABLE);
+	
+	//Reverse bits in a 32 bit word
+	exports.reverse = function(v) {
+	  return  (REVERSE_TABLE[ v         & 0xff] << 24) |
+	          (REVERSE_TABLE[(v >>> 8)  & 0xff] << 16) |
+	          (REVERSE_TABLE[(v >>> 16) & 0xff] << 8)  |
+	           REVERSE_TABLE[(v >>> 24) & 0xff];
+	}
+	
+	//Interleave bits of 2 coordinates with 16 bits.  Useful for fast quadtree codes
+	exports.interleave2 = function(x, y) {
+	  x &= 0xFFFF;
+	  x = (x | (x << 8)) & 0x00FF00FF;
+	  x = (x | (x << 4)) & 0x0F0F0F0F;
+	  x = (x | (x << 2)) & 0x33333333;
+	  x = (x | (x << 1)) & 0x55555555;
+	
+	  y &= 0xFFFF;
+	  y = (y | (y << 8)) & 0x00FF00FF;
+	  y = (y | (y << 4)) & 0x0F0F0F0F;
+	  y = (y | (y << 2)) & 0x33333333;
+	  y = (y | (y << 1)) & 0x55555555;
+	
+	  return x | (y << 1);
+	}
+	
+	//Extracts the nth interleaved component
+	exports.deinterleave2 = function(v, n) {
+	  v = (v >>> n) & 0x55555555;
+	  v = (v | (v >>> 1))  & 0x33333333;
+	  v = (v | (v >>> 2))  & 0x0F0F0F0F;
+	  v = (v | (v >>> 4))  & 0x00FF00FF;
+	  v = (v | (v >>> 16)) & 0x000FFFF;
+	  return (v << 16) >> 16;
+	}
+	
+	
+	//Interleave bits of 3 coordinates, each with 10 bits.  Useful for fast octree codes
+	exports.interleave3 = function(x, y, z) {
+	  x &= 0x3FF;
+	  x  = (x | (x<<16)) & 4278190335;
+	  x  = (x | (x<<8))  & 251719695;
+	  x  = (x | (x<<4))  & 3272356035;
+	  x  = (x | (x<<2))  & 1227133513;
+	
+	  y &= 0x3FF;
+	  y  = (y | (y<<16)) & 4278190335;
+	  y  = (y | (y<<8))  & 251719695;
+	  y  = (y | (y<<4))  & 3272356035;
+	  y  = (y | (y<<2))  & 1227133513;
+	  x |= (y << 1);
+	  
+	  z &= 0x3FF;
+	  z  = (z | (z<<16)) & 4278190335;
+	  z  = (z | (z<<8))  & 251719695;
+	  z  = (z | (z<<4))  & 3272356035;
+	  z  = (z | (z<<2))  & 1227133513;
+	  
+	  return x | (z << 2);
+	}
+	
+	//Extracts nth interleaved component of a 3-tuple
+	exports.deinterleave3 = function(v, n) {
+	  v = (v >>> n)       & 1227133513;
+	  v = (v | (v>>>2))   & 3272356035;
+	  v = (v | (v>>>4))   & 251719695;
+	  v = (v | (v>>>8))   & 4278190335;
+	  v = (v | (v>>>16))  & 0x3FF;
+	  return (v<<22)>>22;
+	}
+	
+	//Computes next combination in colexicographic order (this is mistakenly called nextPermutation on the bit twiddling hacks page)
+	exports.nextCombination = function(v) {
+	  var t = v | (v - 1);
+	  return (t + 1) | (((~t & -~t) - 1) >>> (countTrailingZeros(v) + 1));
+	}
+	
+
+
+/***/ },
+/* 185 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/*===========================================================================*\
+	 * Discrete Fourier Transform (O(n^2) brute-force method)
+	 *
+	 * (c) Vail Systems. Joshua Jung and Ben Bryan. 2015
+	 *
+	 * This code is not designed to be highly optimized but as an educational
+	 * tool to understand the Fast Fourier Transform.
+	\*===========================================================================*/
+	
+	//------------------------------------------------
+	// Note: this code is not optimized and is
+	// primarily designed as an educational and testing
+	// tool.
+	//------------------------------------------------
+	var complex = __webpack_require__(182);
+	var fftUtil = __webpack_require__(183);
+	
+	//-------------------------------------------------
+	// Calculate brute-force O(n^2) DFT for vector.
+	//-------------------------------------------------
+	var dft = function(vector) {
+	  var X = [],
+	      N = vector.length;
+	
+	  for (var k = 0; k < N; k++) {
+	    X[k] = [0, 0]; //Initialize to a 0-valued complex number.
+	
+	    for (var i = 0; i < N; i++) {
+	      var exp = fftUtil.exponent(k * i, N);
+	      var term = complex.multiply([vector[i], 0], exp); //Complex mult of the signal with the exponential term.
+	      X[k] = complex.add(X[k], term); //Complex summation of X[k] and exponential
+	    }
+	  }
+	
+	  return X;
+	};
+	
+	module.exports = dft;
+
+/***/ },
+/* 186 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(2), RootInstanceProvider = __webpack_require__(10), ReactMount = __webpack_require__(12), React = __webpack_require__(65); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
+	
+	// stuff
+	'use strict';
+	
+	var _ = __webpack_require__(169);
+	var mathUtil = __webpack_require__(187);
+	var movingAverageWindowSize = 100;
+	var stdDevCoef = 0.5;
+	var binRanges = [[0, 9], //very low
+	[10, 19], //low
+	[20, 39], //low-mid
+	[40, 79], //mid
+	[80, 159], //mid-high
+	[160, 511]];
+	
+	// refactor this, it's fugly
+	//high
+	module.exports = function (computedWindows) {
+	  // console.log(computedWindows);
+	  // console.log(computedWindows.length);
+	
+	  // Group each window into the bins above,
+	  var groupedWindows = _.map(computedWindows, function (aWindow) {
+	    var groupedWindow = _.groupBy(aWindow, function (keyVal, index) {
+	      for (var i = 0; i < binRanges.length; i++) {
+	        var low = binRanges[i][0];
+	        var high = binRanges[i][1];
+	        if (keyVal.frequency >= low && keyVal.frequency <= high) {
+	          return i;
+	        }
+	      }
+	      throw 'this shouldnt happen...please adjust binRanges to include all freq values';
+	      return -1;
+	    });
+	    return groupedWindow;
+	  });
+	  // console.log(groupedWindows);
+	
+	  // For each window, find the max for each bin,
+	  var groupedMaxWindows = _.map(groupedWindows, function (groupedWindow) {
+	    var groupedMaxes = _.map(groupedWindow, function (group) {
+	      return _.max(group, function (freqMagPair) {
+	        return freqMagPair.magnitude;
+	      });
+	    });
+	    return groupedMaxes;
+	  });
+	
+	  // console.log(groupedMaxWindows);
+	  // console.log(groupedMaxWindows.length);
+	  var filteringData = [];
+	  // note this cuts off towards the end, need better algo
+	  for (var i = 0; i < groupedMaxWindows.length; i++) {
+	
+	    var bound = Math.floor(movingAverageWindowSize / 2);
+	
+	    var low = i - bound;
+	    if (low < 0) {
+	      low = 0;
+	    }
+	    var high = i + bound; // slice dont care
+	    if (high >= groupedMaxWindows.length) {
+	      high = groupedMaxWindows.length - 1;
+	    }
+	
+	    // console.log('low ' + low + '\thigh ' + high);
+	    var windowRange = groupedMaxWindows.slice(low, high);
+	    // console.log(windowRange.length);
+	    // console.log(windowRange);
+	    var range = _.flatten(windowRange);
+	    // console.log(range);
+	    var rangeAvg = mathUtil.average(range, 'magnitude');
+	    var rangeStdDev = mathUtil.standardDeviation(_.map(range, 'magnitude'));
+	    // console.log(range);
+	    // console.log('window #' + i);
+	    // console.log('avg: ' + rangeAvg);
+	    // console.log('stdev ' + rangeStdDev);
+	
+	    var temp = {
+	      average: rangeAvg,
+	      standardDeviation: rangeStdDev
+	    };
+	
+	    filteringData[i] = temp;
+	  }
+	
+	  // console.log(filteringData);
+	
+	  // Find the average of each window, by averaging all max bins per window
+	  // let groupedWindowsAverages = _.map(groupedMaxWindows, (groupedMaxWindow) => {
+	  //   // console.log(groupedMaxWindow);
+	  //   return mathUtil.average(groupedMaxWindow, 'magnitude');
+	  // });
+	
+	  // Convert those window (magnitude) averages into moving (magnitude) averages
+	  // let windowsMovingAverages = mathUtil.simple_moving_average(groupedWindowsAverages, movingAverageWindowSize);
+	
+	  // let standardDeviations = _.map(windowsMovingAverages, (avg, ix) => {
+	  //   // console.log(avg);
+	  //   // console.log(ix);
+	  //   return mathUtil.standardDeviation(windowsMovingAverages);
+	  // });
+	
+	  // need to make this standard deviation sliding
+	  // let standardDeviation = mathUtil.standardDeviation(windowsMovingAverages);
+	  // console.log(standardDeviation);
+	
+	  // Per window, accept only the audio points that are greater than the moving average magnitude of that window
+	  var filteredPoints = _.map(groupedMaxWindows, function (aWindow, windowIndex) {
+	    return _.filter(aWindow, function (freqMagPair) {
+	      // console.log(standardDeviation);
+	      return freqMagPair.magnitude > filteringData[windowIndex].average + filteringData[windowIndex].standardDeviation * stdDevCoef;
+	    });
+	  });
+	  // Return a list of points that are supposedly 'features'
+	  // (e.g. what we think are important audio points in the audio sample)
+	  // console.log(filteredPoints);
+	  // console.log(_.flatten(filteredPoints).length);
+	
+	  return filteredPoints;
+	};
+	
+	/* REACT HOT LOADER */ }).call(this); } finally { if (true) { (function () { var foundReactClasses = module.hot.data && module.hot.data.foundReactClasses || false; if (module.exports && module.makeHot) { var makeExportsHot = __webpack_require__(174); if (makeExportsHot(module, __webpack_require__(65))) { foundReactClasses = true; } var shouldAcceptModule = true && foundReactClasses; if (shouldAcceptModule) { module.hot.accept(function (err) { if (err) { console.error("Cannot not apply hot update to " + "audio-extract.js" + ": " + err.message); } }); } } module.hot.dispose(function (data) { data.makeHot = module.makeHot; data.foundReactClasses = foundReactClasses; }); })(); } }
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)(module)))
+
+/***/ },
+/* 187 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(2), RootInstanceProvider = __webpack_require__(10), ReactMount = __webpack_require__(12), React = __webpack_require__(65); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
@@ -35730,7 +36312,109 @@
 	  }
 	};
 	
-	/* REACT HOT LOADER */ }).call(this); } finally { if (true) { (function () { var foundReactClasses = module.hot.data && module.hot.data.foundReactClasses || false; if (module.exports && module.makeHot) { var makeExportsHot = __webpack_require__(171); if (makeExportsHot(module, __webpack_require__(65))) { foundReactClasses = true; } var shouldAcceptModule = true && foundReactClasses; if (shouldAcceptModule) { module.hot.accept(function (err) { if (err) { console.error("Cannot not apply hot update to " + "math-util.js" + ": " + err.message); } }); } } module.hot.dispose(function (data) { data.makeHot = module.makeHot; data.foundReactClasses = foundReactClasses; }); })(); } }
+	/* REACT HOT LOADER */ }).call(this); } finally { if (true) { (function () { var foundReactClasses = module.hot.data && module.hot.data.foundReactClasses || false; if (module.exports && module.makeHot) { var makeExportsHot = __webpack_require__(174); if (makeExportsHot(module, __webpack_require__(65))) { foundReactClasses = true; } var shouldAcceptModule = true && foundReactClasses; if (shouldAcceptModule) { module.hot.accept(function (err) { if (err) { console.error("Cannot not apply hot update to " + "math-util.js" + ": " + err.message); } }); } } module.hot.dispose(function (data) { data.makeHot = module.makeHot; data.foundReactClasses = foundReactClasses; }); })(); } }
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)(module)))
+
+/***/ },
+/* 188 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(2), RootInstanceProvider = __webpack_require__(10), ReactMount = __webpack_require__(12), React = __webpack_require__(65); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
+	
+	'use strict';
+	
+	var _ = __webpack_require__(169);
+	//example: x(array, 1024, 11025, 0)
+	//probably a prettier way to do this
+	
+	// Takes an array of audiosample windows and applies a timeoffset to the audioArray
+	// based on the window size, sample rate, and provided time offset
+	module.exports = function (audioWindows, audioWindowSize, sampleRate, timeOffset) {
+	  // For each window...
+	  return _.map(audioWindows, function (audioWindow, index) {
+	    // console.log(index);
+	    // Calc cur time for window
+	    var time = index * audioWindowSize / sampleRate + timeOffset;
+	    // Apply time to each point in window. (immutable tho, hence clone)
+	    return _.map(audioWindow, function (audioPointInWindow) {
+	      var temp = {};
+	      temp = _.cloneDeep(audioPointInWindow);
+	      temp.time = time;
+	      return temp;
+	    });
+	  });
+	};
+	
+	/* REACT HOT LOADER */ }).call(this); } finally { if (true) { (function () { var foundReactClasses = module.hot.data && module.hot.data.foundReactClasses || false; if (module.exports && module.makeHot) { var makeExportsHot = __webpack_require__(174); if (makeExportsHot(module, __webpack_require__(65))) { foundReactClasses = true; } var shouldAcceptModule = true && foundReactClasses; if (shouldAcceptModule) { module.hot.accept(function (err) { if (err) { console.error("Cannot not apply hot update to " + "audio-timeoffset.js" + ": " + err.message); } }); } } module.hot.dispose(function (data) { data.makeHot = module.makeHot; data.foundReactClasses = foundReactClasses; }); })(); } }
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)(module)))
+
+/***/ },
+/* 189 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(module) {/* REACT HOT LOADER */ if (true) { (function () { var ReactHotAPI = __webpack_require__(2), RootInstanceProvider = __webpack_require__(10), ReactMount = __webpack_require__(12), React = __webpack_require__(65); module.makeHot = module.hot.data ? module.hot.data.makeHot : ReactHotAPI(function () { return RootInstanceProvider.getRootInstances(ReactMount); }, React); })(); } try { (function () {
+	
+	'use strict';
+	
+	var _ = __webpack_require__(169);
+	
+	function pad(num, size) {
+	  var s = num + "";
+	  while (s.length < size) {
+	    s = "0" + s;
+	  }return s;
+	}
+	
+	module.exports = function (audioArray, anchorOffset, zoneSize, songMetadata) {
+	  // console.log(audioArray);
+	  // console.log(anchorOffset);
+	  // console.log(zoneSize);
+	
+	  var allZonesAddresses = _.map(audioArray, function (element, index) {
+	    var anchor = index;
+	    var startingIndexOfZone = anchor + anchorOffset;
+	    var absTimeOfAnchor = audioArray[index].time; // todo add delta time offset to function
+	
+	    var zoneAddresses = [];
+	
+	    if (audioArray.length < startingIndexOfZone + zoneSize) return [];
+	
+	    for (var i = startingIndexOfZone; i < startingIndexOfZone + zoneSize; i++) {
+	      var addressArr = [];
+	      //[“frequency of the  anchor”;” frequency of the  point”;”delta time between the anchor and the point”].
+	      // addressArr.push(audioArray[anchor].frequency);
+	      // addressArr.push(audioArray[i].frequency);
+	      var deltaTime = Math.abs(audioArray[i].time - audioArray[anchor].time);
+	      // addressArr.push(deltaTime);
+	      // // console.log(addressArr);
+	      // zoneAddresses.push(addressArr);
+	
+	      var anchorFreq = audioArray[anchor].frequency;
+	      var pointFreq = audioArray[i].frequency;
+	      var encodedAddress = pad(anchorFreq, 3) + pad(pointFreq, 3) + pad(Math.floor(deltaTime * 1000), 6);
+	
+	      var address = {
+	        anchorFreq: anchorFreq,
+	        pointFreq: pointFreq,
+	        timeDelta: deltaTime,
+	        encodedAddress: encodedAddress,
+	        absTimeOfAnchor: absTimeOfAnchor,
+	        songMetadata: songMetadata
+	      };
+	      zoneAddresses.push(address);
+	    };
+	    return zoneAddresses;
+	  });
+	  // console.log(allZonesAddresses);
+	  return allZonesAddresses;
+	};
+	
+	//     //[“absolute time of the anchor in the song”;”Id of the song”].
+	//     let addressLink = [];
+	//     addressLink.push(arr[anchor].time);
+	//     addressLink.push(songId);
+
+	/* REACT HOT LOADER */ }).call(this); } finally { if (true) { (function () { var foundReactClasses = module.hot.data && module.hot.data.foundReactClasses || false; if (module.exports && module.makeHot) { var makeExportsHot = __webpack_require__(174); if (makeExportsHot(module, __webpack_require__(65))) { foundReactClasses = true; } var shouldAcceptModule = true && foundReactClasses; if (shouldAcceptModule) { module.hot.accept(function (err) { if (err) { console.error("Cannot not apply hot update to " + "generate-target-zone.js" + ": " + err.message); } }); } } module.hot.dispose(function (data) { data.makeHot = module.makeHot; data.foundReactClasses = foundReactClasses; }); })(); } }
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)(module)))
 
 /***/ }

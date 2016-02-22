@@ -3,6 +3,8 @@ import encodeWAV from './wav-encoder.js';
 import styles from './AudioRecorderStyle.scss';
 var Worker = require("worker!./worker");
 
+import 'whatwg-fetch';
+
 
 class AudioRecorder extends Component {
   constructor(props) {
@@ -31,17 +33,22 @@ class AudioRecorder extends Component {
                           navigator.mozGetUserMedia ||
                           navigator.msGetUserMedia;
     navigator.getUserMedia({ audio: true }, (stream) => {
-      const gain = this.audioContext.createGain();
+      // const gain = this.audioContext.createGain();
       const audioSource = this.audioContext.createMediaStreamSource(stream);
-      audioSource.connect(gain);
+      // audioSource.connect(gain);
 
-      const bufferSize = 2048;
+      const bufferSize = 4096;
       const recorder = this.audioContext.createScriptProcessor(bufferSize, 2, 2);
       recorder.onaudioprocess = (event) => {
         // save left and right buffers
+        // for(let i = 0; i < 2; i++) {
+        //   const channel = event.inputBuffer.getChannelData(i);
+        //   this.buffers[i].push(new Float32Array(channel));
+        // }
         for(let i = 0; i < 2; i++) {
           const channel = event.inputBuffer.getChannelData(i);
           this.buffers[i].push(new Float32Array(channel));
+          this.bufferLength += bufferSize;
         }
         this.audioLength += bufferSize; // moved by JJ from inside for loop to outside
       };
@@ -108,8 +115,26 @@ class AudioRecorder extends Component {
         worker.onmessage = function(e) {
           console.log('Message received from worker');
           console.log(e.data);
+
+          console.log('attempt');
+          fetch('http://localhost:8001/api/fingerprint', {
+            method: 'post',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(e.data)
+          });
+
+          // request('http://www.google.com', function (error, response, body) {
+          //   if (!error && response.statusCode == 200) {
+          //     console.log(body) // Show the HTML for the Google homepage.
+          //   }
+          // })
         }
         // start it up
+        console.log('update'
+      );
 
         console.log('test!!!!!!');
         // console.log()

@@ -13,5 +13,5 @@ onmessage = function(e) {
 	var res = fingerprint(floats, 44100, 11025);
 	console.log(res);
 	postMessage(res);
-	close();
+	// close();
 }
