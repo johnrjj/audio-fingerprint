@@ -54,7 +54,7 @@
 /******/ 	
 /******/ 	
 /******/ 	var hotApplyOnUpdate = true;
-/******/ 	var hotCurrentHash = "554658edca8d1ef000a8"; // eslint-disable-line no-unused-vars
+/******/ 	var hotCurrentHash = "c24057b2e821bcfc1e5b"; // eslint-disable-line no-unused-vars
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentParents = []; // eslint-disable-line no-unused-vars
 /******/ 	
@@ -668,7 +668,7 @@
 		}
 	}
 	
-	/* WEBPACK VAR INJECTION */}.call(exports, "?http://0.0.0.0:3000"))
+	/* WEBPACK VAR INJECTION */}.call(exports, "?http://0.0.0.0:8080"))
 
 /***/ },
 /* 2 */
@@ -28169,7 +28169,7 @@
 	          // console.log(buffer.duration);
 	
 	          var audioBufferToPassToWorker = buffer.getChannelData(0);
-	          console.log(audioBufferToPassToWorker.length);
+	          // console.log(audioBufferToPassToWorker.length);
 	          var sampleRate = buffer.sampleRate;
 	
 	          var worker = new Worker();
@@ -28189,11 +28189,16 @@
 	            }).then(function (response) {
 	              if (response.ok) {
 	                console.log('success');
+	                console.log(response.body);
+	                // console.log(response.json());
+	                response.json().then(function (json) {
+	                  console.log(json);
+	                });
 	              } else {
 	                console.log('bad response');
 	              }
 	            }).catch(function (error) {
-	              console.log('error' + ('' + error));
+	              console.log('error ' + ('' + error));
 	            });
 	
 	            // request('http://www.google.com', function (error, response, body) {
@@ -28203,9 +28208,10 @@
 	            // })
 	          };
 	          // start it up
-	          console.log('update');
+	          // console.log('update'
+	          // );
 	
-	          console.log('test!!!!!!');
+	          // console.log('test!!!!!!');
 	          // console.log()
 	          worker.postMessage({
 	            'buffer': audioBufferToPassToWorker.buffer,

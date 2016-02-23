@@ -4,7 +4,7 @@ var path = require('path');
 module.exports = {
     entry: [
       // 'babel-polyfill',
-      'webpack-dev-server/client?http://0.0.0.0:3000', // WebpackDevServer host and port
+      'webpack-dev-server/client?http://0.0.0.0:8080', // WebpackDevServer host and port
       // 'webpack/hot/only-dev-server', // only hot modules...
       'webpack/hot/dev-server', // here will reload everything
       './src/main.jsx' // entry point
@@ -12,7 +12,7 @@ module.exports = {
     devtool: process.env.WEBPACK_DEVTOOL || 'source-map',
     output: {
         path: path.join(__dirname, 'public'),
-        publicPath: '/',
+        publicPath: 'public/',
         filename: 'bundle.js'
     },
     resolve: {

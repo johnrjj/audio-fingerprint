@@ -10,6 +10,8 @@ class AudioRecorder extends Component {
   constructor(props) {
     super(props);
 
+
+
     this.buffers = [[], []];
     this.audioLength = 0;
     this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -26,6 +28,7 @@ class AudioRecorder extends Component {
   }
 
   startRecording() {
+        console.log('updated2!');
     this.buffers = [[], []];
     this.audioLength = 0;
     navigator.getUserMedia = navigator.getUserMedia ||
@@ -75,7 +78,7 @@ class AudioRecorder extends Component {
   }
 
   stopRecording() {
-    console.log('stopp!!');
+    console.log('stoppextra!2!');
     // console.log(this.sampleRate);
     this.recordingStream.getTracks()[0].stop();
     // console.log(this.audioLength);
@@ -127,6 +130,11 @@ class AudioRecorder extends Component {
           }).then(response => {
             if(response.ok) {
               console.log('success');
+              console.log(response.body);
+              // console.log(response.json());
+              response.json().then(json => {
+                console.log(json);
+              })
             }
             else {
               console.log('bad response');
