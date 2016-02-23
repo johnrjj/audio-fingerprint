@@ -8,6 +8,8 @@ var assert = require('assert');
 var ObjectId = require('mongodb').ObjectID;
 let url = 'mongodb://localhost:27017/musicindexer1';
 
+var matcher = require('../lib/audio-matcher');
+
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
@@ -34,6 +36,9 @@ router.route('/fingerprint')
       // MongoClient.connect(url, function(err, db) {
       //   var collection = db.collection('fingerprints');
       // });
+      let fingerprints = req.body;
+      let matches = matcher(fingerprints);
+
       res.json({
         'hue': 'hue',
       });
