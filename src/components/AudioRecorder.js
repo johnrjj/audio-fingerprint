@@ -33,9 +33,9 @@ class AudioRecorder extends Component {
                           navigator.mozGetUserMedia ||
                           navigator.msGetUserMedia;
     navigator.getUserMedia({ audio: true }, (stream) => {
-      // const gain = this.audioContext.createGain();
+      const gain = this.audioContext.createGain();
       const audioSource = this.audioContext.createMediaStreamSource(stream);
-      // audioSource.connect(gain);
+      audioSource.connect(gain);
 
       const bufferSize = 4096;
       const recorder = this.audioContext.createScriptProcessor(bufferSize, 2, 2);
@@ -76,11 +76,11 @@ class AudioRecorder extends Component {
 
   stopRecording() {
     console.log('stopp!!');
-    console.log(this.sampleRate);
+    // console.log(this.sampleRate);
     this.recordingStream.getTracks()[0].stop();
-    console.log(this.audioLength);
-    console.log(this.buffers[0].length);
-    console.log('aboe actual buf size');
+    // console.log(this.audioLength);
+    // console.log(this.buffers[0].length);
+    // console.log('aboe actual buf size');
     const audioData = encodeWAV(this.buffers, this.audioLength, this.sampleRate);
 
     this.setState({
@@ -102,12 +102,12 @@ class AudioRecorder extends Component {
     reader.onloadend = () => {
       // this.audioContext.decodeAudioData(reader.result).then((buffer) => { //need to figure out why not working
       this.audioContext.decodeAudioData(reader.result, (buffer) => {
-        console.log(this.buffers[0].length);
-        console.log(buffer.length);
-        console.log(buffer.duration);
+        // console.log(this.buffers[0].length);
+        // console.log(buffer.length);
+        // console.log(buffer.duration);
 
         let audioBufferToPassToWorker = buffer.getChannelData(0)
-        console.log(audioBufferToPassToWorker.length);
+        // console.log(audioBufferToPassToWorker.length);
         let sampleRate = buffer.sampleRate;
 
         var worker = new Worker;
@@ -124,6 +124,16 @@ class AudioRecorder extends Component {
               'Content-Type': 'application/json'
             },
             body: JSON.stringify(e.data)
+          }).then(response => {
+            if(response.ok) {
+              console.log('success');
+            }
+            else {
+              console.log('bad response');
+            }
+
+          }).catch(error => {
+            console.log('error ' + `${error}`);
           });
 
           // request('http://www.google.com', function (error, response, body) {
@@ -133,10 +143,10 @@ class AudioRecorder extends Component {
           // })
         }
         // start it up
-        console.log('update'
-      );
+        // console.log('update'
+      // );
 
-        console.log('test!!!!!!');
+        // console.log('test!!!!!!');
         // console.log()
         worker.postMessage( {
           'buffer': audioBufferToPassToWorker.buffer,

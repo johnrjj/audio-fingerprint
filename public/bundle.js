@@ -54,7 +54,7 @@
 /******/ 	
 /******/ 	
 /******/ 	var hotApplyOnUpdate = true;
-/******/ 	var hotCurrentHash = "71b76617abf2b7a1dc02"; // eslint-disable-line no-unused-vars
+/******/ 	var hotCurrentHash = "554658edca8d1ef000a8"; // eslint-disable-line no-unused-vars
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentParents = []; // eslint-disable-line no-unused-vars
 /******/ 	
@@ -28096,13 +28096,18 @@
 	        var audioSource = _this2.audioContext.createMediaStreamSource(stream);
 	        audioSource.connect(gain);
 	
-	        var bufferSize = 2048;
+	        var bufferSize = 4096;
 	        var recorder = _this2.audioContext.createScriptProcessor(bufferSize, 2, 2);
 	        recorder.onaudioprocess = function (event) {
 	          // save left and right buffers
+	          // for(let i = 0; i < 2; i++) {
+	          //   const channel = event.inputBuffer.getChannelData(i);
+	          //   this.buffers[i].push(new Float32Array(channel));
+	          // }
 	          for (var i = 0; i < 2; i++) {
 	            var channel = event.inputBuffer.getChannelData(i);
 	            _this2.buffers[i].push(new Float32Array(channel));
+	            _this2.bufferLength += bufferSize;
 	          }
 	          _this2.audioLength += bufferSize; // moved by JJ from inside for loop to outside
 	        };
@@ -28130,11 +28135,11 @@
 	    key: 'stopRecording',
 	    value: function stopRecording() {
 	      console.log('stopp!!');
-	      console.log(this.sampleRate);
+	      // console.log(this.sampleRate);
 	      this.recordingStream.getTracks()[0].stop();
-	      console.log(this.audioLength);
-	      console.log(this.buffers[0].length);
-	      console.log('aboe actual buf size');
+	      // console.log(this.audioLength);
+	      // console.log(this.buffers[0].length);
+	      // console.log('aboe actual buf size');
 	      var audioData = (0, _wavEncoder2.default)(this.buffers, this.audioLength, this.sampleRate);
 	
 	      this.setState({
@@ -28159,9 +28164,9 @@
 	      reader.onloadend = function () {
 	        // this.audioContext.decodeAudioData(reader.result).then((buffer) => { //need to figure out why not working
 	        _this3.audioContext.decodeAudioData(reader.result, function (buffer) {
-	          console.log(_this3.buffers[0].length);
-	          console.log(buffer.length);
-	          console.log(buffer.duration);
+	          // console.log(this.buffers[0].length);
+	          // console.log(buffer.length);
+	          // console.log(buffer.duration);
 	
 	          var audioBufferToPassToWorker = buffer.getChannelData(0);
 	          console.log(audioBufferToPassToWorker.length);
@@ -28181,6 +28186,14 @@
 	                'Content-Type': 'application/json'
 	              },
 	              body: JSON.stringify(e.data)
+	            }).then(function (response) {
+	              if (response.ok) {
+	                console.log('success');
+	              } else {
+	                console.log('bad response');
+	              }
+	            }).catch(function (error) {
+	              console.log('error' + ('' + error));
 	            });
 	
 	            // request('http://www.google.com', function (error, response, body) {
@@ -28444,6 +28457,7 @@
 	  writeUTFBytes(view, 0, 'RIFF');
 	  view.setUint32(4, 44 + interleaved.length * 2, true);
 	  writeUTFBytes(view, 8, 'WAVE');
+	
 	  writeUTFBytes(view, 12, 'fmt ');
 	  view.setUint32(16, 16, true);
 	  view.setUint16(20, 1, true);

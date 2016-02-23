@@ -1,6 +1,6 @@
 /******/ (function(modules) { // webpackBootstrap
 /******/ 	var hotApplyOnUpdate = true;
-/******/ 	var hotCurrentHash = "ecb9fa9f47fe4ccd507f"; // eslint-disable-line no-unused-vars
+/******/ 	var hotCurrentHash = "d5a296a59ce119f05067"; // eslint-disable-line no-unused-vars
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentParents = []; // eslint-disable-line no-unused-vars
 /******/ 	
@@ -519,14 +519,15 @@
 		// console.log('here!!!');
 		// throw 'hello';
 		var floats = new Float32Array(e.data.buffer);
-		console.log('in worker');
+		// console.log('in worker');
+		// console.log(floats.length);
 		// console.log(floats);
 		// console.log(floats);
 		// fingerprint();
-		var res = fingerprint(floats, 44100, 11025);
-		console.log(res);
+		var res = fingerprint(floats, 44100, 11025, null);
+		// console.log(res);
 		postMessage(res);
-		// close();
+		close();
 	};
 	
 	/* REACT HOT LOADER */ }).call(this); } finally { if (true) { (function () { var foundReactClasses = module.hot.data && module.hot.data.foundReactClasses || false; if (module.exports && module.makeHot) { var makeExportsHot = __webpack_require__(174); if (makeExportsHot(module, __webpack_require__(65))) { foundReactClasses = true; } var shouldAcceptModule = true && foundReactClasses; if (shouldAcceptModule) { module.hot.accept(function (err) { if (err) { console.error("Cannot not apply hot update to " + "worker.js" + ": " + err.message); } }); } } module.hot.dispose(function (data) { data.makeHot = module.makeHot; data.foundReactClasses = foundReactClasses; }); })(); } }
@@ -32928,19 +32929,29 @@
 	
 	module.exports = function (signal, sampleRateOfRecording, desiredSamplingRate, signalMetadata) {
 	  //  Downsample signal, then run FFT on it
+	  // console.log('here in fingerprint');
+	  // console.log(signal.length);
+	
 	  var converted = audioConverter(signal, sampleRateOfRecording, desiredSamplingRate, 1024);
 	  // Group audio into windows, then group frequencies into bins per window
+	  // console.log(converted.length);
 	  var extracted = audioExtracter(converted);
 	
 	  // Apply timeoffsets to all audio data points (right now theyre all in order)
 	  var extractedWithTimeOffsets = audioTimeOffset(extracted, 1024, desiredSamplingRate, 0);
-	
+	  // console.log(extractedWithTimeOffsets.length);
+	  // console.log('next value will be empty???');
 	  // Flatten the list, now that we have the chosen audio points w/ correct time offsets
 	  var flattenedExtractedAudio = _.flatten(extractedWithTimeOffsets);
+	  // console.log(flattenedExtractedAudio.length);
 	
-	  var targetZones = targetZoneGenerator(flattenedExtractedAudio, 3, 5, signalMetadata);
+	  var targetZones = targetZoneGenerator(flattenedExtractedAudio, 3, 6, signalMetadata);
 	
+	  // console.log(targetZones.length);
 	  var targetZonesFlattened = _.flatten(targetZones);
+	  // console.log(targetZonesFlattened.length);
+	  // console.log('done in fingerprint, returning');
+	  // console.log(targetZonesFlattened);
 	  return targetZonesFlattened;
 	};
 	
@@ -36120,14 +36131,14 @@
 	
 	var _ = __webpack_require__(169);
 	var mathUtil = __webpack_require__(187);
-	var movingAverageWindowSize = 100;
-	var stdDevCoef = 0.5;
+	var movingAverageWindowSize = 20;
+	var stdDevCoef = -.2;
 	var binRanges = [[0, 9], //very low
 	[10, 19], //low
 	[20, 39], //low-mid
 	[40, 79], //mid
 	[80, 159], //mid-high
-	[160, 511]];
+	[160, 319], [320, 511]];
 	
 	// refactor this, it's fugly
 	//high
@@ -36179,10 +36190,8 @@
 	      high = groupedMaxWindows.length - 1;
 	    }
 	
-	    // console.log('low ' + low + '\thigh ' + high);
 	    var windowRange = groupedMaxWindows.slice(low, high);
-	    // console.log(windowRange.length);
-	    // console.log(windowRange);
+	
 	    var range = _.flatten(windowRange);
 	    // console.log(range);
 	    var rangeAvg = mathUtil.average(range, 'magnitude');
@@ -36392,7 +36401,11 @@
 	      var anchorFreq = audioArray[anchor].frequency;
 	      var pointFreq = audioArray[i].frequency;
 	      var encodedAddress = pad(anchorFreq, 3) + pad(pointFreq, 3) + pad(Math.floor(deltaTime * 1000), 6);
+	      // let encodedAddress = pad(anchorFreq, 3) + pad(pointFreq, 3) + pad(Math.round(Math.floor(deltaTime*1000)), 6);
 	
+	      // let encodedAddress = pad(anchorFreq, 3) + pad(pointFreq, 3) + pad(Math.round(Math.floor(deltaTime*100 / 10) * 10), 6);
+	
+	      // console.log(encodedAddress);
 	      var address = {
 	        anchorFreq: anchorFreq,
 	        pointFreq: pointFreq,
