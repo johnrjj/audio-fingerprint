@@ -1,7 +1,7 @@
 # audio-fingerprint
 takes a 15 second audio sample and is able to identify it... almost done, subsets of songs are working, need to work on robustness when sets of songs get larger. work in progress, just a passion project when i have free time
 
-most of the interesting stuff is located in /lib/
+most of the interesting stuff is located in /lib/ (algorithms), and /src/ (frontend) 
 
 how it works:
 
