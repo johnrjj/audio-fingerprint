@@ -3,6 +3,9 @@ takes a 15 second audio sample and is able to identify it... almost done, subset
 
 most of the interesting stuff is located in /lib/
 
+how it works:
+
+stereo audio file -> merge streams into mono -> filter -> downsample -> more filtering (windowing functions) -> fast fourier transform -> combitorial hashing to get fingerprint of audio
 
 note: if you really want to run it: npm start
 
